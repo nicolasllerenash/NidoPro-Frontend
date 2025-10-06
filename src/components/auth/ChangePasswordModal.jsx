@@ -157,7 +157,7 @@ const ChangePasswordModal = ({ isOpen, onClose, userId, userName }) => {
                       <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div className="text-sm text-orange-800">
                         <p className="font-medium mb-1">¡Hola {userName}!</p>
-                        <p>Necesitas cambiar tu contraseña para poder usar NidoPro de forma segura.</p>
+                        <p>Necesitas cambiar tu contraseña para poder usar EDA de forma segura.</p>
                       </div>
                     </div>
                   </div>

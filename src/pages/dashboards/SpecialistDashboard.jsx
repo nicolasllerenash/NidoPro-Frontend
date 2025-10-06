@@ -28,7 +28,7 @@ const SpecialistDashboard = () => {
         <div className="specialist-sidebar-header">
           <div className="specialist-logo">
             <span className="specialist-logo-icon">🏫</span>
-            <span className="specialist-logo-text">NidoPro</span>
+            <span className="specialist-logo-text">EDA</span>
           </div>
           <div className="specialist-info">
             <h3>{user?.specialty}</h3>

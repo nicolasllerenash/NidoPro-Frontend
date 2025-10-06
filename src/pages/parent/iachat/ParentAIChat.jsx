@@ -27,7 +27,7 @@ const ParentAIChat = () => {
     {
       id: 1,
       type: 'ai',
-      content: '👨‍👩‍👧‍👦 ¡Hola! Soy el **Asistente para Familias NidoPro** potenciado por ChatGPT.\n\n🤝 Estoy aquí para ayudarte con:\n• Consejos para apoyar el aprendizaje de tu hijo\n• Estrategias de comunicación familia-escuela\n• Sugerencias para el desarrollo socioemocional\n• Resolución de dudas sobre tareas y actividades\n\n🎯 **¿En qué puedo ayudarte hoy como familia?** Puedes preguntarme sobre cualquier tema relacionado con la educación de tu hijo.',
+      content: '👨‍👩‍👧‍👦 ¡Hola! Soy el **Asistente para Familias EDA** potenciado por ChatGPT.\n\n🤝 Estoy aquí para ayudarte con:\n• Consejos para apoyar el aprendizaje de tu hijo\n• Estrategias de comunicación familia-escuela\n• Sugerencias para el desarrollo socioemocional\n• Resolución de dudas sobre tareas y actividades\n\n🎯 **¿En qué puedo ayudarte hoy como familia?** Puedes preguntarme sobre cualquier tema relacionado con la educación de tu hijo.',
       timestamp: new Date(Date.now() - 60000)
     }
   ]);
@@ -142,7 +142,7 @@ const ParentAIChat = () => {
       {
         id: 1,
         type: 'ai',
-        content: '🔄 **Conversación reiniciada**\n\n👨‍👩‍👧‍👦 ¡Hola de nuevo! Soy el **Asistente para Familias NidoPro**.\n\n¿En qué puedo ayudarte hoy como familia?',
+        content: '🔄 **Conversación reiniciada**\n\n👨‍👩‍👧‍👦 ¡Hola de nuevo! Soy el **Asistente para Familias EDA**.\n\n¿En qué puedo ayudarte hoy como familia?',
         timestamp: new Date()
       }
     ]);
@@ -390,7 +390,7 @@ const ParentAIChat = () => {
                 <span className="sm:hidden">Error</span>
               </span>
             )}
-            <span className="hidden md:inline">NidoPro IA v2.1</span>
+            <span className="hidden md:inline">EDA IA v2.1</span>
           </div>
         </div>
       </div>

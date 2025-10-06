@@ -14,7 +14,7 @@
   <circle cx="70" cy="65" r="4" fill="#64748b"/>
   
   <!-- Texto NidoPro -->
-  <text x="60" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="#64748b">NidoPro</text>
+  <text x="60" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="#64748b">EDA</text>
   
   <!-- Gradiente -->
   <defs>

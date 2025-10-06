@@ -954,7 +954,7 @@ const Juegos = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">Juegos Educativos</h1>
-              <p className="text-sm text-blue-600 font-medium">🌟 NidoPro - Educación que Inspira</p>
+              <p className="text-sm text-blue-600 font-medium">🌟 EDA - Educación que Inspira</p>
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -989,7 +989,7 @@ const Juegos = () => {
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">🎮 Juegos Educativos para Niños</h1>
             <p className="text-xl text-gray-600 mb-2">¡Aprende jugando con diversión!</p>
-            <p className="text-lg text-blue-600 font-semibold">🌟 NidoPro - Educación que Inspira 🌟</p>
+            <p className="text-lg text-blue-600 font-semibold">🌟 EDA - Educación que Inspira 🌟</p>
           </div>
           <button
             onClick={toggleFullscreen}

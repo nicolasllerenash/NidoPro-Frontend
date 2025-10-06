@@ -1,8 +1,8 @@
-# NidoPro-Frontend
+# EDA-Frontend
 
 ## 🎓 Sistema de Gestión Educativa - Frontend
 
-**NidoPro** es un sistema completo de gestión educativa desarrollado con React + Vite, diseñado para facilitar la administración de centros educativos mediante interfaces específicas para cada rol.
+**EDA** es un sistema completo de gestión educativa desarrollado con React + Vite, diseñado para facilitar la administración de centros educativos mediante interfaces específicas para cada rol.
 
 ## ✨ Características Principales
 

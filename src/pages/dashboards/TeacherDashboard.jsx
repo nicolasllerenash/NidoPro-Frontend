@@ -596,7 +596,7 @@ const TeacherDashboard = () => {
                     <p className="text-sm text-gray-500 text-center">
                       Estás a punto de cerrar sesión en{" "}
                       <span className="font-semibold text-green-600">
-                        NidoPro
+                        EDA
                       </span>
                       . ¿Estás seguro de que quieres continuar?
                     </p>
