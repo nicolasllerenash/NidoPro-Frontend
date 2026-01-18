@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 const useAuthStore = create(
   persist(
@@ -29,12 +29,12 @@ const useAuthStore = create(
       logout: async () => {
         try {
           // Llamar al servicio de logout para limpiar en el backend
-          const { authService } = await import('../services/authService');
+          const { authService } = await import("../services/authService");
           await authService.logout();
         } catch (error) {
-          console.log('Error al cerrar sesión en backend:', error);
+          console.log("Error al cerrar sesión en backend:", error);
         }
-        
+
         // Limpiar estado de Zustand
         set({
           user: null,
@@ -46,13 +46,13 @@ const useAuthStore = create(
           error: null,
           initialized: false,
         });
-        
+
         // Limpiar localStorage completamente
-        localStorage.removeItem('token');
-        localStorage.removeItem('auth-storage');
-        
+        localStorage.removeItem("token");
+        localStorage.removeItem("auth-storage");
+
         // Redirigir al login
-        window.location.href = '/login';
+        window.location.href = "/login";
       },
 
       setLoading: (loading) => {
@@ -96,25 +96,29 @@ const useAuthStore = create(
       // Verificar si es admin
       isAdmin: () => {
         const { role } = get();
-        return role?.nombre === 'admin' || role?.nombre === 'administrador';
+        return (
+          role?.nombre === "admin" ||
+          role?.nombre === "administrador" ||
+          role?.nombre === "ADMINISTRADOR"
+        );
       },
 
       // Verificar si es profesor/trabajador
       isTrabajador: () => {
         const { role } = get();
-        return role?.nombre === 'profesor' || role?.nombre === 'trabajador';
+        return role?.nombre === "profesor" || role?.nombre === "trabajador";
       },
 
       // Verificar si es padre
       isPadre: () => {
         const { role } = get();
-        return role?.nombre === 'padre' || role?.nombre === 'parent';
+        return role?.nombre === "padre" || role?.nombre === "parent";
       },
 
       // Verificar si es especialista
       isEspecialista: () => {
         const { role } = get();
-        return role?.nombre === 'especialista' || role?.nombre === 'specialist';
+        return role?.nombre === "especialista" || role?.nombre === "specialist";
       },
 
       // Obtener el ID del rol para APIs
@@ -127,47 +131,47 @@ const useAuthStore = create(
       initializeAuth: async () => {
         const { initialized } = get();
         if (initialized) return; // Evitar múltiples inicializaciones
-        
+
         set({ loading: true, initialized: true });
-        
-        const token = localStorage.getItem('token');
+
+        const token = localStorage.getItem("token");
         if (token) {
           // Para modo desarrollo, validar directamente sin backend
-          if (token.startsWith('dev-token-')) {
-            const userId = token.replace('dev-token-', '');
+          if (token.startsWith("dev-token-")) {
+            const userId = token.replace("dev-token-", "");
             const testUsers = {
-              '1': {
-                id: '1',
-                email: 'admin@nidopro.com',
-                nombre: 'Administrador',
-                apellido: 'Sistema',
-                role: { id: '1', nombre: 'admin' },
-                permissions: ['all']
+              1: {
+                id: "1",
+                email: "admin@nidopro.com",
+                nombre: "Administrador",
+                apellido: "Sistema",
+                role: { id: "1", nombre: "admin" },
+                permissions: ["all"],
               },
-              '2': {
-                id: '2', 
-                email: 'trabajador@nidopro.com',
-                nombre: 'Juan',
-                apellido: 'Pérez',
-                role: { id: '2', nombre: 'trabajador' },
-                permissions: ['read_students', 'write_students']
-              }
+              2: {
+                id: "2",
+                email: "trabajador@nidopro.com",
+                nombre: "Juan",
+                apellido: "Pérez",
+                role: { id: "2", nombre: "trabajador" },
+                permissions: ["read_students", "write_students"],
+              },
             };
-            
+
             const user = testUsers[userId];
             if (user) {
-              set({ 
+              set({
                 user,
-                token, 
-                isAuthenticated: true, 
+                token,
+                isAuthenticated: true,
                 role: user.role,
                 permissions: user.permissions,
-                loading: false 
+                loading: false,
               });
               return;
             }
           }
-          
+
           // Para tokens reales, verificar si es un token válido localmente sin llamar al backend
           // (Comentado para evitar error 404 ya que no existe /auth/validate en el backend)
           /*
@@ -192,36 +196,42 @@ const useAuthStore = create(
             console.log('Backend no disponible, manteniendo sesión persistida');
           }
           */
-          
+
           // Si hay un token guardado, mantener el estado persistido
-          console.log('🔄 Restaurando sesión persistida desde localStorage');
-          
+          console.log("🔄 Restaurando sesión persistida desde localStorage");
+
           // Obtener el estado persistido del localStorage
-          const persistedState = JSON.parse(localStorage.getItem('auth-storage') || '{}');
-          
-          if (persistedState.state && persistedState.state.user && persistedState.state.role) {
+          const persistedState = JSON.parse(
+            localStorage.getItem("auth-storage") || "{}"
+          );
+
+          if (
+            persistedState.state &&
+            persistedState.state.user &&
+            persistedState.state.role
+          ) {
             // Restaurar el estado persistido completo
-            set({ 
+            set({
               user: persistedState.state.user,
-              token, 
-              isAuthenticated: true, 
+              token,
+              isAuthenticated: true,
               role: persistedState.state.role,
               permissions: persistedState.state.permissions || [],
               loading: false,
-              error: null
+              error: null,
             });
           } else {
             // Si no hay estado persistido, limpiar todo
-            localStorage.removeItem('token');
-            localStorage.removeItem('auth-storage');
-            set({ 
+            localStorage.removeItem("token");
+            localStorage.removeItem("auth-storage");
+            set({
               user: null,
               token: null,
               role: null,
               permissions: [],
               isAuthenticated: false,
               loading: false,
-              error: null
+              error: null,
             });
           }
         } else {
@@ -231,7 +241,7 @@ const useAuthStore = create(
       },
     }),
     {
-      name: 'auth-storage', // Nombre para localStorage
+      name: "auth-storage", // Nombre para localStorage
       partialize: (state) => ({
         user: state.user,
         token: state.token,

@@ -1,24 +1,27 @@
-# NidoPro-Frontend
+# EDA-Frontend
 
 ## 🎓 Sistema de Gestión Educativa - Frontend
 
-**NidoPro** es un sistema completo de gestión educativa desarrollado con React + Vite, diseñado para facilitar la administración de centros educativos mediante interfaces específicas para cada rol.
+**EDA** es un sistema completo de gestión educativa desarrollado con React + Vite, diseñado para facilitar la administración de centros educativos mediante interfaces específicas para cada rol.
 
 ## ✨ Características Principales
 
 ### 🎨 **Diseño Elegante y Moderno**
+
 - Interfaz minimalista con paleta de colores profesional
 - Tipografía Inter de Google Fonts
 - Componentes reutilizables y responsive
 - Animaciones suaves y efectos glass-morphism
 
 ### 👥 **Sistema de Roles Multifuncional**
+
 - **Administradores**: Gestión completa de usuarios y sistema
 - **Docentes**: Administración de clases y estudiantes
 - **Padres**: Seguimiento académico de sus hijos
 - **Especialistas**: Evaluaciones psicopedagógicas
 
 ### 🏗️ **Arquitectura Escalable**
+
 - Estructura organizada por roles y funcionalidades
 - Componentes modulares y reutilizables
 - Hooks personalizados para lógica de negocio
@@ -27,16 +30,18 @@
 ## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
+
 - Node.js (versión 18 o superior)
 - npm o yarn
 
 ### Instalación
+
 ```bash
 # Clonar el repositorio
-git clone https://github.com/Hannalab-pe/NidoPro-Frontend.git
+git clone https://github.com/Hannalab-pe/EDA-Frontend.git
 
 # Navegar al directorio
-cd NidoPro-Frontend
+cd EDA-Frontend
 
 # Instalar dependencias
 npm install
@@ -91,32 +96,36 @@ src/
 
 | Rol | Email | Contraseña | Descripción |
 |-----|-------|------------|-------------|
-| **Director** | director@nidopro.edu | director123 | Administración completa |
-| **Docente** | docente1@nidopro.edu | docente123 | Gestión de clases |
-| **Padre** | padre1@gmail.com | padre123 | Seguimiento de hijos |
-| **Especialista** | psicologa@nidopro.edu | especialista123 | Evaluaciones |
+| **Director** | <director@nidopro.edu> | director123 | Administración completa |
+| **Docente** | <docente1@nidopro.edu> | docente123 | Gestión de clases |
+| **Padre** | <padre1@gmail.com> | padre123 | Seguimiento de hijos |
+| **Especialista** | <psicologa@nidopro.edu> | especialista123 | Evaluaciones |
 
 ## 🎯 Funcionalidades por Rol
 
 ### 👩‍💼 **Administradores**
+
 - Dashboard con estadísticas generales
 - Gestión completa de usuarios
 - Control de permisos y accesos
 - Reportes del sistema
 
 ### 👨‍🏫 **Docentes**
+
 - Dashboard con resumen de clases
 - Gestión de estudiantes por clase
 - Sistema de calificaciones
 - Comunicación con padres
 
 ### 👪 **Padres de Familia**
+
 - Seguimiento académico por hijo
 - Visualización de calificaciones y asistencia
 - Comunicación con docentes
 - Notificaciones del centro educativo
 
 ### 👩‍⚕️ **Especialistas**
+
 - Gestión de evaluaciones psicopedagógicas
 - Seguimiento de casos especiales
 - Programación de citas
@@ -134,6 +143,7 @@ src/
 ## 🎨 Sistema de Diseño
 
 ### Paleta de Colores
+
 ```css
 /* Colores Principales */
 --primary-color: #64748b      /* Slate 500 */
@@ -152,6 +162,7 @@ src/
 ```
 
 ### Componentes
+
 - **Buttons**: 3 variantes (primary, secondary, outline)
 - **Inputs**: Con validación y estados de error
 - **Cards**: Con hover effects y sombras
@@ -197,11 +208,13 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 👨‍💻 Autor
 
 **Hannalab-pe**
+
 - GitHub: [@Hannalab-pe](https://github.com/Hannalab-pe)
 
 ## 🆘 Soporte
 
 Si tienes preguntas o necesitas ayuda, por favor:
+
 1. Revisa la documentación
 2. Busca en los issues existentes
 3. Crea un nuevo issue si no encuentras la solución

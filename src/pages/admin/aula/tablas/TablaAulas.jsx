@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { School, User, Calendar, Users, Eye, Edit, Trash2 } from 'lucide-react';
-import { DataTable } from '../../../../components/common/DataTable';
-import ModalAgregarAula from '../modales/ModalAgregarAula';
-import ModalVerAula from '../modales/ModalVerAula';
-import ModalEditarAula from '../modales/ModalEditarAula';
-import ModalEliminarAula from '../modales/ModalEliminarAula';
+import React, { useState } from "react";
+import { School, User, Calendar, Users, Eye, Edit, Trash2 } from "lucide-react";
+import { DataTable } from "../../../../components/common/DataTable";
+import ModalAgregarAula from "../modales/ModalAgregarAula";
+import ModalVerAula from "../modales/ModalVerAula";
+import ModalEditarAula from "../modales/ModalEditarAula";
+import ModalEliminarAula from "../modales/ModalEliminarAula";
 
-// Definición de columnas para aulas
+// Definición de columnas para aulas (GET /aula)
 const aulasColumns = [
   {
-    accessor: 'seccion',
-    Header: 'Sección',
+    accessor: "seccion",
+    Header: "Sección",
     sortable: true,
     Cell: ({ row }) => (
       <div className="flex items-center">
@@ -21,24 +21,43 @@ const aulasColumns = [
           <div className="text-sm font-medium text-gray-900">
             Sección {row.seccion}
           </div>
-          <div className="text-sm text-gray-500">
-            {row.descripcion || 'Sin descripción'}
-          </div>
         </div>
       </div>
-    )
+    ),
   },
   {
-    accessor: 'cantidadEstudiantes',
-    Header: 'Estudiantes',
+    accessor: "cantidadEstudiantes",
+    Header: "Cantidad de Estudiantes",
     sortable: true,
     Cell: ({ row }) => (
       <div className="flex items-center">
         <Users className="w-4 h-4 text-gray-400 mr-2" />
-        <span className="text-sm text-gray-900">{row.cantidadEstudiantes || 0}</span>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+          {row.cantidadEstudiantes || 0} estudiantes
+        </span>
       </div>
-    )
-  }
+    ),
+  },
+  {
+    accessor: "idGrado.grado",
+    Header: "Grado",
+    sortable: true,
+    Cell: ({ row }) => (
+      <div className="text-sm font-medium text-gray-900">
+        {row.idGrado?.grado || "Sin grado"}
+      </div>
+    ),
+  },
+  {
+    accessor: "idGrado.descripcion",
+    Header: "Descripción del Grado",
+    sortable: false,
+    Cell: ({ row }) => (
+      <div className="text-sm text-gray-600">
+        {row.idGrado?.descripcion || "Sin descripción"}
+      </div>
+    ),
+  },
 ];
 
 const TablaAulas = ({
@@ -48,7 +67,7 @@ const TablaAulas = ({
   onEdit,
   onDelete,
   onView,
-  onRefresh
+  onRefresh,
 }) => {
   // Estados para modales
   const [showAulaModal, setShowAulaModal] = useState(false);
@@ -88,13 +107,13 @@ const TablaAulas = ({
   // Configuración de filtros para la tabla
   const aulasFilters = [
     {
-      key: 'estado',
-      label: 'Estado',
+      key: "estado",
+      label: "Estado",
       options: [
-        { value: 'activa', label: 'Activa' },
-        { value: 'inactiva', label: 'Inactiva' }
-      ]
-    }
+        { value: "activa", label: "Activa" },
+        { value: "inactiva", label: "Inactiva" },
+      ],
+    },
   ];
 
   return (
@@ -114,7 +133,7 @@ const TablaAulas = ({
           view: false,
           import: false,
           export: false,
-          refresh: false
+          refresh: false,
         }}
         filters={aulasFilters}
         addButtonText="Nueva Aula"

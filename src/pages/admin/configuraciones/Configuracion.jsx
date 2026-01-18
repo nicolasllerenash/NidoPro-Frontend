@@ -30,11 +30,11 @@ const ConfiguracionPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [settings, setSettings] = useState({
     // General
-    institutionName: 'Nido Pro - Centro Educativo',
+    institutionName: 'EDA - Centro Educativo',
     address: 'Av. Universitaria 123, San Miguel, Lima',
     phone: '+51 987 654 321',
     email: 'contacto@nidopro.edu.pe',
-    website: 'www.nidopro.edu.pe',
+    website: 'www.EDA.edu.pe',
     
     // Security
     currentPassword: '',

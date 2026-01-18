@@ -1,19 +1,19 @@
 // src/hooks/usePensiones.js
-import { useState, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import pensionService from '../services/pensionService';
+import { useState, useCallback, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import pensionService from "../services/pensionService";
 
 // Query Keys para pensiones
 const pensionesKeys = {
-  all: ['pensiones'],
-  lists: () => [...pensionesKeys.all, 'list'],
+  all: ["pensiones"],
+  lists: () => [...pensionesKeys.all, "list"],
   list: (filters) => [...pensionesKeys.lists(), { filters }],
-  details: () => [...pensionesKeys.all, 'detail'],
+  details: () => [...pensionesKeys.all, "detail"],
   detail: (id) => [...pensionesKeys.details(), id],
-  byStudent: (studentId) => [...pensionesKeys.all, 'student', studentId],
-  byMonth: (mes, anio) => [...pensionesKeys.all, 'month', mes, anio],
-  statistics: () => [...pensionesKeys.all, 'statistics']
+  byStudent: (studentId) => [...pensionesKeys.all, "student", studentId],
+  byMonth: (mes, anio) => [...pensionesKeys.all, "month", mes, anio],
+  statistics: () => [...pensionesKeys.all, "statistics"],
 };
 
 /**
@@ -22,23 +22,23 @@ const pensionesKeys = {
  */
 export const usePensiones = (initialFilters = {}) => {
   const queryClient = useQueryClient();
-  
+
   // Estado para filtros y búsqueda
   const [filters, setFilters] = useState({
-    estadoPago: '',
-    mes: '',
-    anio: '',
-    estudiante: '',
-    search: '',
-    ...initialFilters
+    estadoPago: "",
+    mes: "",
+    anio: "",
+    estudiante: "",
+    search: "",
+    ...initialFilters,
   });
 
   // Query principal para obtener pensiones
-  const { 
-    data: rawPensiones, 
-    isLoading: loading, 
+  const {
+    data: rawPensiones,
+    isLoading: loading,
     error,
-    refetch: refetchPensiones 
+    refetch: refetchPensiones,
   } = useQuery({
     queryKey: pensionesKeys.list(filters),
     queryFn: async () => {
@@ -57,10 +57,10 @@ export const usePensiones = (initialFilters = {}) => {
   });
 
   // ✅ Asegurar array y convertir monto a número
-  const pensiones = Array.isArray(rawPensiones) 
-    ? rawPensiones.map(p => ({
+  const pensiones = Array.isArray(rawPensiones)
+    ? rawPensiones.map((p) => ({
         ...p,
-        monto: p.monto ? Number(p.monto) : 0
+        monto: p.monto ? Number(p.monto) : 0,
       }))
     : [];
 
@@ -68,28 +68,30 @@ export const usePensiones = (initialFilters = {}) => {
   const createMutation = useMutation({
     mutationFn: (pensionData) => pensionService.createPension(pensionData),
     onMutate: () => {
-      const loadingToast = toast.loading('Registrando pensión...', {
-        description: 'Guardando datos financieros...'
+      const loadingToast = toast.loading("Registrando pensión...", {
+        description: "Guardando datos financieros...",
       });
       return { loadingToast };
     },
     onSuccess: (newPension, variables, context) => {
       queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pensionesKeys.statistics() });
-      
+
       if (newPension.idEstudiante) {
-        queryClient.invalidateQueries({ queryKey: pensionesKeys.byStudent(newPension.idEstudiante) });
+        queryClient.invalidateQueries({
+          queryKey: pensionesKeys.byStudent(newPension.idEstudiante),
+        });
       }
-      
-      toast.success('Pensión registrada exitosamente', {
+
+      toast.success("Pensión registrada exitosamente", {
         id: context.loadingToast,
-        description: `Pensión de S/ ${newPension.monto} para ${newPension.mes}/${newPension.anio} creada`
+        description: `Pensión de S/ ${newPension.monto} para ${newPension.mes}/${newPension.anio} creada`,
       });
     },
     onError: (error, variables, context) => {
-      toast.error('Error al registrar pensión', {
+      toast.error("Error al registrar pensión", {
         id: context?.loadingToast,
-        description: error.message || 'Ha ocurrido un error inesperado'
+        description: error.message || "Ha ocurrido un error inesperado",
       });
     },
   });
@@ -97,29 +99,33 @@ export const usePensiones = (initialFilters = {}) => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => pensionService.updatePension(id, data),
     onMutate: () => {
-      const loadingToast = toast.loading('Actualizando pensión...', {
-        description: 'Guardando cambios...'
+      const loadingToast = toast.loading("Actualizando pensión...", {
+        description: "Guardando cambios...",
       });
       return { loadingToast };
     },
     onSuccess: (updatedPension, variables, context) => {
       queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: pensionesKeys.detail(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: pensionesKeys.detail(variables.id),
+      });
       queryClient.invalidateQueries({ queryKey: pensionesKeys.statistics() });
-      
+
       if (updatedPension.idEstudiante) {
-        queryClient.invalidateQueries({ queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante) });
+        queryClient.invalidateQueries({
+          queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante),
+        });
       }
-      
-      toast.success('Pensión actualizada exitosamente', {
+
+      toast.success("Pensión actualizada exitosamente", {
         id: context.loadingToast,
-        description: `Estado de pago: ${updatedPension.estadoPago}`
+        description: `Estado de pago: ${updatedPension.estadoPago}`,
       });
     },
     onError: (error, variables, context) => {
-      toast.error('Error al actualizar pensión', {
+      toast.error("Error al actualizar pensión", {
         id: context?.loadingToast,
-        description: error.message || 'Ha ocurrido un error inesperado'
+        description: error.message || "Ha ocurrido un error inesperado",
       });
     },
   });
@@ -127,8 +133,8 @@ export const usePensiones = (initialFilters = {}) => {
   const deleteMutation = useMutation({
     mutationFn: (id) => pensionService.deletePension(id),
     onMutate: () => {
-      const loadingToast = toast.loading('Eliminando pensión...', {
-        description: 'Procesando eliminación...'
+      const loadingToast = toast.loading("Eliminando pensión...", {
+        description: "Procesando eliminación...",
       });
       return { loadingToast };
     },
@@ -136,16 +142,16 @@ export const usePensiones = (initialFilters = {}) => {
       queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pensionesKeys.statistics() });
       queryClient.removeQueries({ queryKey: pensionesKeys.detail(id) });
-      
-      toast.success('Pensión eliminada exitosamente', {
+
+      toast.success("Pensión eliminada exitosamente", {
         id: context.loadingToast,
-        description: 'El registro financiero ha sido eliminado del sistema'
+        description: "El registro financiero ha sido eliminado del sistema",
       });
     },
     onError: (error, variables, context) => {
-      toast.error('Error al eliminar pensión', {
+      toast.error("Error al eliminar pensión", {
         id: context?.loadingToast,
-        description: error.message || 'Ha ocurrido un error inesperado'
+        description: error.message || "Ha ocurrido un error inesperado",
       });
     },
   });
@@ -154,91 +160,104 @@ export const usePensiones = (initialFilters = {}) => {
     mutationFn: ({ pension }) => {
       let newStatus;
       switch (pension.estadoPago) {
-        case 'pendiente':
-          newStatus = 'pagado';
+        case "pendiente":
+          newStatus = "pagado";
           break;
-        case 'pagado':
-          newStatus = 'vencido';
+        case "pagado":
+          newStatus = "vencido";
           break;
-        case 'vencido':
-          newStatus = 'pendiente';
+        case "vencido":
+          newStatus = "pendiente";
           break;
         default:
-          newStatus = 'pendiente';
+          newStatus = "pendiente";
       }
-      
-      return pensionService.updatePension(pension.id, { 
-        ...pension, 
+
+      return pensionService.updatePension(pension.id, {
+        ...pension,
         estadoPago: newStatus,
-        fechaPago: newStatus === 'pagado' ? new Date().toISOString() : null
+        fechaPago: newStatus === "pagado" ? new Date().toISOString() : null,
       });
     },
     onMutate: ({ pension }) => {
-      const loadingToast = toast.loading('Cambiando estado de pago...', {
-        description: 'Procesando solicitud...'
+      const loadingToast = toast.loading("Cambiando estado de pago...", {
+        description: "Procesando solicitud...",
       });
       return { loadingToast, pension };
     },
     onSuccess: (updatedPension, variables, context) => {
       queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: pensionesKeys.detail(variables.pension.id) });
+      queryClient.invalidateQueries({
+        queryKey: pensionesKeys.detail(variables.pension.id),
+      });
       queryClient.invalidateQueries({ queryKey: pensionesKeys.statistics() });
-      
+
       if (updatedPension.idEstudiante) {
-        queryClient.invalidateQueries({ queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante) });
+        queryClient.invalidateQueries({
+          queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante),
+        });
       }
-      
+
       const statusText = {
-        'pagado': 'marcada como pagada',
-        'pendiente': 'marcada como pendiente',
-        'vencido': 'marcada como vencida'
+        pagado: "marcada como pagada",
+        pendiente: "marcada como pendiente",
+        vencido: "marcada como vencida",
       };
-      
-      toast.success('Estado actualizado exitosamente', {
+
+      toast.success("Estado actualizado exitosamente", {
         id: context.loadingToast,
-        description: `La pensión ha sido ${statusText[updatedPension.estadoPago]}`
+        description: `La pensión ha sido ${
+          statusText[updatedPension.estadoPago]
+        }`,
       });
     },
     onError: (error, variables, context) => {
-      toast.error('Error al cambiar estado de pago', {
+      toast.error("Error al cambiar estado de pago", {
         id: context?.loadingToast,
-        description: error.message || 'Ha ocurrido un error inesperado'
+        description: error.message || "Ha ocurrido un error inesperado",
       });
     },
   });
 
   const markAsPaidMutation = useMutation({
-    mutationFn: ({ id, paymentData }) => pensionService.updatePension(id, {
-      estadoPago: 'pagado',
-      fechaPago: new Date().toISOString(),
-      metodoPago: paymentData.metodoPago,
-      referenciaPago: paymentData.referenciaPago,
-      ...paymentData
-    }),
+    mutationFn: ({ id, paymentData }) =>
+      pensionService.updatePension(id, {
+        estadoPago: "pagado",
+        fechaPago: new Date().toISOString(),
+        metodoPago: paymentData.metodoPago,
+        referenciaPago: paymentData.referenciaPago,
+        ...paymentData,
+      }),
     onMutate: () => {
-      const loadingToast = toast.loading('Procesando pago...', {
-        description: 'Registrando pago recibido...'
+      const loadingToast = toast.loading("Procesando pago...", {
+        description: "Registrando pago recibido...",
       });
       return { loadingToast };
     },
     onSuccess: (updatedPension, variables, context) => {
       queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: pensionesKeys.detail(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: pensionesKeys.detail(variables.id),
+      });
       queryClient.invalidateQueries({ queryKey: pensionesKeys.statistics() });
-      
+
       if (updatedPension.idEstudiante) {
-        queryClient.invalidateQueries({ queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante) });
+        queryClient.invalidateQueries({
+          queryKey: pensionesKeys.byStudent(updatedPension.idEstudiante),
+        });
       }
-      
-      toast.success('Pago registrado exitosamente', {
+
+      toast.success("Pago registrado exitosamente", {
         id: context.loadingToast,
-        description: `S/ ${updatedPension.monto} - ${updatedPension.metodoPago || 'Efectivo'}`
+        description: `S/ ${updatedPension.monto} - ${
+          updatedPension.metodoPago || "Efectivo"
+        }`,
       });
     },
     onError: (error, variables, context) => {
-      toast.error('Error al procesar pago', {
+      toast.error("Error al procesar pago", {
         id: context?.loadingToast,
-        description: error.message || 'Ha ocurrido un error inesperado'
+        description: error.message || "Ha ocurrido un error inesperado",
       });
     },
   });
@@ -258,36 +277,49 @@ export const usePensiones = (initialFilters = {}) => {
         byMonth: {},
         byStudent: {},
         averageAmount: 0,
-        recentPayments: 0
+        recentPayments: 0,
       };
     }
 
     const total = pensiones.length;
-    
-    const totalPagados = pensiones.filter(p => p.estadoPago === 'pagado').length;
-    const totalPendientes = pensiones.filter(p => p.estadoPago === 'pendiente').length;
-    const totalVencidos = pensiones.filter(p => p.estadoPago === 'vencido').length;
+
+    const totalPagados = pensiones.filter(
+      (p) => p.estadoPago === "pagado"
+    ).length;
+    const totalPendientes = pensiones.filter(
+      (p) => p.estadoPago === "pendiente"
+    ).length;
+    const totalVencidos = pensiones.filter(
+      (p) => p.estadoPago === "vencido"
+    ).length;
 
     const totalIngresos = pensiones
-      .filter(p => p.estadoPago === 'pagado')
+      .filter((p) => p.estadoPago === "pagado")
       .reduce((sum, p) => sum + (p.monto || 0), 0);
-    
+
     const totalPendientesMonto = pensiones
-      .filter(p => p.estadoPago === 'pendiente')
+      .filter((p) => p.estadoPago === "pendiente")
       .reduce((sum, p) => sum + (p.monto || 0), 0);
-    
+
     const totalVencidosMonto = pensiones
-      .filter(p => p.estadoPago === 'vencido')
+      .filter((p) => p.estadoPago === "vencido")
       .reduce((sum, p) => sum + (p.monto || 0), 0);
 
     const porcentajePagados = total > 0 ? (totalPagados / total) * 100 : 0;
-    const porcentajePendientes = total > 0 ? (totalPendientes / total) * 100 : 0;
+    const porcentajePendientes =
+      total > 0 ? (totalPendientes / total) * 100 : 0;
     const porcentajeVencidos = total > 0 ? (totalVencidos / total) * 100 : 0;
 
     const byMonth = pensiones.reduce((acc, pension) => {
       const monthKey = `${pension.mes}-${pension.anio}`;
       if (!acc[monthKey]) {
-        acc[monthKey] = { total: 0, pagados: 0, pendientes: 0, vencidos: 0, monto: 0 };
+        acc[monthKey] = {
+          total: 0,
+          pagados: 0,
+          pendientes: 0,
+          vencidos: 0,
+          monto: 0,
+        };
       }
       acc[monthKey].total += 1;
       acc[monthKey][pension.estadoPago] += 1;
@@ -296,9 +328,15 @@ export const usePensiones = (initialFilters = {}) => {
     }, {});
 
     const byStudent = pensiones.reduce((acc, pension) => {
-      const studentId = pension.idEstudiante || 'sin-estudiante';
+      const studentId = pension.idEstudiante || "sin-estudiante";
       if (!acc[studentId]) {
-        acc[studentId] = { total: 0, pagados: 0, pendientes: 0, vencidos: 0, monto: 0 };
+        acc[studentId] = {
+          total: 0,
+          pagados: 0,
+          pendientes: 0,
+          vencidos: 0,
+          monto: 0,
+        };
       }
       acc[studentId].total += 1;
       acc[studentId][pension.estadoPago] += 1;
@@ -306,12 +344,15 @@ export const usePensiones = (initialFilters = {}) => {
       return acc;
     }, {});
 
-    const averageAmount = total > 0 ? pensiones.reduce((sum, p) => sum + (p.monto || 0), 0) / total : 0;
+    const averageAmount =
+      total > 0
+        ? pensiones.reduce((sum, p) => sum + (p.monto || 0), 0) / total
+        : 0;
 
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    const recentPayments = pensiones.filter(p => 
-      p.estadoPago === 'pagado' && new Date(p.fechaPago) > oneMonthAgo
+    const recentPayments = pensiones.filter(
+      (p) => p.estadoPago === "pagado" && new Date(p.fechaPago) > oneMonthAgo
     ).length;
 
     return {
@@ -331,75 +372,108 @@ export const usePensiones = (initialFilters = {}) => {
   }, [pensiones]);
 
   // Funciones CRUD usando mutations
-  const createPension = useCallback(async (pensionData) => {
-    return createMutation.mutateAsync(pensionData);
-  }, [createMutation]);
+  const createPension = useCallback(
+    async (pensionData) => {
+      return createMutation.mutateAsync(pensionData);
+    },
+    [createMutation]
+  );
 
-  const updatePension = useCallback(async (id, pensionData) => {
-    return updateMutation.mutateAsync({ id, data: pensionData });
-  }, [updateMutation]);
+  const updatePension = useCallback(
+    async (id, pensionData) => {
+      return updateMutation.mutateAsync({ id, data: pensionData });
+    },
+    [updateMutation]
+  );
 
-  const deletePension = useCallback(async (id) => {
-    return deleteMutation.mutateAsync(id);
-  }, [deleteMutation]);
+  const deletePension = useCallback(
+    async (id) => {
+      return deleteMutation.mutateAsync(id);
+    },
+    [deleteMutation]
+  );
 
-  const togglePensionStatus = useCallback(async (pension) => {
-    return toggleStatusMutation.mutateAsync({ pension });
-  }, [toggleStatusMutation]);
+  const togglePensionStatus = useCallback(
+    async (pension) => {
+      return toggleStatusMutation.mutateAsync({ pension });
+    },
+    [toggleStatusMutation]
+  );
 
-  const markAsPaid = useCallback(async (id, paymentData) => {
-    return markAsPaidMutation.mutateAsync({ id, paymentData });
-  }, [markAsPaidMutation]);
+  const markAsPaid = useCallback(
+    async (id, paymentData) => {
+      return markAsPaidMutation.mutateAsync({ id, paymentData });
+    },
+    [markAsPaidMutation]
+  );
 
   // Funciones de filtrado y búsqueda
   const updateFilters = useCallback((newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
   const resetFilters = useCallback(() => {
     setFilters({
-      estadoPago: '',
-      mes: '',
-      anio: '',
-      estudiante: '',
-      search: ''
+      estadoPago: "",
+      mes: "",
+      anio: "",
+      estudiante: "",
+      search: "",
     });
   }, []);
 
-  const searchPensiones = useCallback((searchTerm) => {
-    updateFilters({ search: searchTerm });
-  }, [updateFilters]);
+  const searchPensiones = useCallback(
+    (searchTerm) => {
+      updateFilters({ search: searchTerm });
+    },
+    [updateFilters]
+  );
 
-  const filterByEstadoPago = useCallback((estadoPago) => {
-    updateFilters({ estadoPago });
-  }, [updateFilters]);
+  const filterByEstadoPago = useCallback(
+    (estadoPago) => {
+      updateFilters({ estadoPago });
+    },
+    [updateFilters]
+  );
 
-  const filterByMes = useCallback((mes) => {
-    updateFilters({ mes });
-  }, [updateFilters]);
+  const filterByMes = useCallback(
+    (mes) => {
+      updateFilters({ mes });
+    },
+    [updateFilters]
+  );
 
-  const filterByAnio = useCallback((anio) => {
-    updateFilters({ anio });
-  }, [updateFilters]);
+  const filterByAnio = useCallback(
+    (anio) => {
+      updateFilters({ anio });
+    },
+    [updateFilters]
+  );
 
-  const filterByEstudiante = useCallback((estudiante) => {
-    updateFilters({ estudiante });
-  }, [updateFilters]);
+  const filterByEstudiante = useCallback(
+    (estudiante) => {
+      updateFilters({ estudiante });
+    },
+    [updateFilters]
+  );
 
   // Estados derivados
   const creating = createMutation.isPending;
   const updating = updateMutation.isPending;
   const deleting = deleteMutation.isPending;
   const uploading = false; // Para compatibilidad
-  
+
   // Funciones de utilidad
-  const fetchPensiones = useCallback(async (customFilters = {}) => {
-    if (Object.keys(customFilters).length > 0) {
-      updateFilters(customFilters);
-    } else {
-      return refetchPensiones();
-    }
-  }, [refetchPensiones, updateFilters]);
+  const fetchPensiones = useCallback(
+    async (customFilters = {}) => {
+      if (Object.keys(customFilters).length > 0) {
+        updateFilters(customFilters);
+      } else {
+        return refetchPensiones();
+      }
+    },
+    [refetchPensiones, updateFilters]
+  );
 
   const refreshPensiones = useCallback(() => {
     return refetchPensiones();
@@ -435,9 +509,12 @@ export const usePensiones = (initialFilters = {}) => {
     queryClient.invalidateQueries({ queryKey: pensionesKeys.lists() });
   }, [queryClient]);
 
-  const invalidateDetail = useCallback((id) => {
-    queryClient.invalidateQueries({ queryKey: pensionesKeys.detail(id) });
-  }, [queryClient]);
+  const invalidateDetail = useCallback(
+    (id) => {
+      queryClient.invalidateQueries({ queryKey: pensionesKeys.detail(id) });
+    },
+    [queryClient]
+  );
 
   // Objeto de retorno del hook
   return {
@@ -458,7 +535,7 @@ export const usePensiones = (initialFilters = {}) => {
     deletePension,
     togglePensionStatus,
     markAsPaid,
-    
+
     // Funciones de búsqueda y filtrado
     searchPensiones,
     filterByEstadoPago,
@@ -467,30 +544,32 @@ export const usePensiones = (initialFilters = {}) => {
     filterByEstudiante,
     updateFilters,
     resetFilters,
-    
+
     // Funciones de utilidad
     fetchPensiones,
     refreshPensiones,
-    
+
     // Funciones de cache
     invalidateCache: invalidateAll,
     invalidateLists,
     invalidateDetail,
-    
+
     // Funciones derivadas para pensiones
-    getPagadas: () => pensiones.filter(p => p.estadoPago === 'pagado'),
-    getPendientes: () => pensiones.filter(p => p.estadoPago === 'pendiente'),
-    getVencidas: () => pensiones.filter(p => p.estadoPago === 'vencido'),
-    getPensionsByEstudiante: (idEstudiante) => pensiones.filter(p => p.idEstudiante === idEstudiante),
-    getPensionsByMonth: (mes, anio) => pensiones.filter(p => p.mes === mes && p.anio === anio),
-    
+    getPagadas: () => pensiones.filter((p) => p.estadoPago === "pagado"),
+    getPendientes: () => pensiones.filter((p) => p.estadoPago === "pendiente"),
+    getVencidas: () => pensiones.filter((p) => p.estadoPago === "vencido"),
+    getPensionsByEstudiante: (idEstudiante) =>
+      pensiones.filter((p) => p.idEstudiante === idEstudiante),
+    getPensionsByMonth: (mes, anio) =>
+      pensiones.filter((p) => p.mes === mes && p.anio === anio),
+
     // Funciones de estadísticas específicas
     getTotalIngresos,
     getTotalPendientes,
     getTotalVencidos,
     getPorcentajePagados,
     getAverageAmount,
-    
+
     // Estados computados
     hasPensiones: pensiones.length > 0,
     isOperating: creating || updating || deleting || uploading,
@@ -500,18 +579,19 @@ export const usePensiones = (initialFilters = {}) => {
 
 /**
  * Hook simple para obtener todas las pensiones para la tabla
+ * Usa GET /pension para traer las plantillas base de pensiones
  */
 export const usePensionesTabla = () => {
   return useQuery({
-    queryKey: ['pensiones'],
-    queryFn: () => pensionService.getAllPensiones(),
+    queryKey: ["pensiones"],
+    queryFn: () => pensionService.getAllPensionesBase(),
     staleTime: 5 * 60 * 1000, // 5 minutos
     cacheTime: 10 * 60 * 1000, // 10 minutos
     refetchOnWindowFocus: false,
     retry: 3,
     onError: (error) => {
-      console.error('❌ Error al cargar pensiones en tabla:', error);
-      toast.error('Error al cargar las pensiones');
+      console.error("❌ Error al cargar pensiones en tabla:", error);
+      toast.error("Error al cargar las pensiones");
     },
     // Asegurar que siempre retorne un array y extraer correctamente los datos
     select: (data) => {
@@ -519,25 +599,25 @@ export const usePensionesTabla = () => {
       if (Array.isArray(data)) {
         return data;
       }
-      
+
       // Si tiene la estructura response.info.data
       if (data?.info?.data && Array.isArray(data.info.data)) {
         return data.info.data;
       }
-      
+
       // Si tiene la estructura response.pensiones
       if (data?.pensiones && Array.isArray(data.pensiones)) {
         return data.pensiones;
       }
-      
+
       // Si tiene la estructura response.data
       if (data?.data && Array.isArray(data.data)) {
         return data.data;
       }
-      
+
       // Fallback: array vacío
       return [];
-    }
+    },
   });
 };
 
@@ -551,37 +631,38 @@ export const usePensionesSimple = () => {
     try {
       // Para el endpoint simple, solo enviamos el monto
       const payload = {
-        monto: Number(data.monto)
+        monto: Number(data.monto),
       };
-      
+
       // Usar fetch directamente para el endpoint simple
-      const token = localStorage.getItem('token');
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
-      
+      const token = localStorage.getItem("token");
+      const API_BASE_URL =
+        import.meta.env.VITE_API_URL || "https://nidopro.up.railway.app/api/v1";
+
       const response = await fetch(`${API_BASE_URL}/pension`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Error al crear pensión');
+        throw new Error(errorData.message || "Error al crear pensión");
       }
 
       const result = await response.json();
-      
+
       // Invalidar caché para refrescar la lista
-      queryClient.invalidateQueries(['pensiones']);
-      toast.success('Pensión creada exitosamente');
-      
+      queryClient.invalidateQueries(["pensiones"]);
+      toast.success("Pensión creada exitosamente");
+
       return result;
     } catch (error) {
-      console.error('❌ Error al crear pensión:', error);
-      toast.error(error.message || 'Error al crear pensión');
+      console.error("❌ Error al crear pensión:", error);
+      toast.error(error.message || "Error al crear pensión");
       throw error;
     }
   };
@@ -593,18 +674,31 @@ export const usePensionesSimple = () => {
  * Hook para obtener pensiones como opciones para selectores
  */
 export const usePensionesOptions = () => {
-  const { data: pensiones = [], isLoading } = usePensionesTabla();
+  const { data: pensiones = [], isLoading } = useQuery({
+    queryKey: ["pensiones-base"],
+    queryFn: () => pensionService.getAllPensionesBase(),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    cacheTime: 10 * 60 * 1000, // 10 minutos
+    refetchOnWindowFocus: false,
+    retry: 3,
+    onError: (error) => {
+      console.error("❌ Error al cargar pensiones base:", error);
+      toast.error("Error al cargar las pensiones");
+    },
+  });
 
-  const options = pensiones.map(pension => ({
+  const options = pensiones.map((pension) => ({
     value: pension.idPension,
-    label: `S/ ${parseFloat(pension.monto).toFixed(2)} - Vence día ${pension.fechaVencimientoMensual}`,
-    pension: pension
+    label: `S/ ${parseFloat(pension.monto).toFixed(2)} - Vence día ${
+      pension.fechaVencimientoMensual
+    }`,
+    pension: pension,
   }));
 
   return {
     options,
     isLoading,
-    hasPensiones: pensiones.length > 0
+    hasPensiones: pensiones.length > 0,
   };
 };
 
@@ -613,16 +707,17 @@ export const usePensionesOptions = () => {
  */
 export const usePensionesPorApoderado = (apoderadoId, filters = {}) => {
   return useQuery({
-    queryKey: ['pensiones-apoderado', apoderadoId, filters],
-    queryFn: () => pensionService.getPensionesPorApoderado(apoderadoId, filters),
+    queryKey: ["pensiones-apoderado", apoderadoId, filters],
+    queryFn: () =>
+      pensionService.getPensionesPorApoderado(apoderadoId, filters),
     enabled: !!apoderadoId,
     staleTime: 5 * 60 * 1000, // 5 minutos
     cacheTime: 10 * 60 * 1000, // 10 minutos
     refetchOnWindowFocus: false,
     retry: 2,
     onError: (error) => {
-      console.error('❌ Error al cargar pensiones por apoderado:', error);
-      toast.error('Error al cargar las pensiones del apoderado');
+      console.error("❌ Error al cargar pensiones por apoderado:", error);
+      toast.error("Error al cargar las pensiones del apoderado");
     },
     // Asegurar que siempre retorne un array
     select: (data) => {
@@ -630,7 +725,7 @@ export const usePensionesPorApoderado = (apoderadoId, filters = {}) => {
         return data;
       }
       return [];
-    }
+    },
   });
 };
 
@@ -639,26 +734,26 @@ export const usePensionesPorApoderado = (apoderadoId, filters = {}) => {
  */
 export const usePensionesPorApoderados = (apoderadoIds, filters = {}) => {
   return useQuery({
-    queryKey: ['pensiones-apoderados', apoderadoIds, filters],
+    queryKey: ["pensiones-apoderados", apoderadoIds, filters],
     queryFn: async () => {
       if (!apoderadoIds || apoderadoIds.length === 0) {
         return [];
       }
 
-      console.log('🔍 Obteniendo pensiones de apoderados:', apoderadoIds);
+      console.log("🔍 Obteniendo pensiones de apoderados:", apoderadoIds);
 
       // Obtener pensiones de cada apoderado
-      const promises = apoderadoIds.map(apoderadoId =>
+      const promises = apoderadoIds.map((apoderadoId) =>
         pensionService.getPensionesPorApoderado(apoderadoId, filters)
       );
 
       const results = await Promise.all(promises);
-      
+
       // Combinar todas las pensiones en un solo array
       const allPensiones = results.flat();
-      
-      console.log('✅ Pensiones obtenidas de apoderados:', allPensiones.length);
-      
+
+      console.log("✅ Pensiones obtenidas de apoderados:", allPensiones.length);
+
       return allPensiones;
     },
     enabled: !!apoderadoIds && apoderadoIds.length > 0,
@@ -667,9 +762,9 @@ export const usePensionesPorApoderados = (apoderadoIds, filters = {}) => {
     refetchOnWindowFocus: false,
     retry: 2,
     onError: (error) => {
-      console.error('❌ Error al cargar pensiones de apoderados:', error);
-      toast.error('Error al cargar las pensiones');
-    }
+      console.error("❌ Error al cargar pensiones de apoderados:", error);
+      toast.error("Error al cargar las pensiones");
+    },
   });
 };
 

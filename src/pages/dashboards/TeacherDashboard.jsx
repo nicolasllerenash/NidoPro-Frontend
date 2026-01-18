@@ -135,7 +135,7 @@ const TeacherDashboard = () => {
       label: "Mis Evaluaciones",
       icon: FileText,
       category: "evaluaciones",
-    }
+    },
   ];
 
   // Calcular estadísticas dinámicas basadas en datos reales
@@ -204,6 +204,18 @@ const TeacherDashboard = () => {
       evaluaciones: "Evaluaciones Personales",
     };
     return labels[category] || category;
+  };
+
+  // Función para obtener el icono de categoría
+  const getCategoryIcon = (category) => {
+    const icons = {
+      dashboard: BarChart3,
+      herramientas: Bot,
+      academico: GraduationCap,
+      gestion: Users,
+      evaluaciones: ClipboardList,
+    };
+    return icons[category] || GraduationCap;
   };
 
   // Función para manejar el logout con confirmación
@@ -280,9 +292,10 @@ const TeacherDashboard = () => {
       >
         {/* Mobile close button */}
         <div className="flex items-center bg-green-600 justify-between p-7 border-b border-gray-200 lg:justify-start">
-          <div className="flex items-center space-x-3 ">
-            <Baby className="w-8 h-8 text-white" />
-            <span className="text-xl font-bold text-white">Nido Pro</span>
+          <div className="flex items-center space-x-3 mt-1">
+            <span className="text-xl font-bold text-white tracking-wider">
+              EDA
+            </span>
           </div>
           <button
             className="lg:hidden p-2 text-white hover:text-gray-200"
@@ -310,7 +323,10 @@ const TeacherDashboard = () => {
                   {showCategorySeparator && (
                     <div className="my-4 px-4 ">
                       <div className="h-px bg-gray-400"></div>
-                      <div className="text-sm font-bold text-green-900 uppercase tracking-wider mt-2 mb-1">
+                      <div className="text-sm font-bold text-green-900 uppercase tracking-wider mt-2 mb-1 flex items-center gap-2">
+                        {React.createElement(getCategoryIcon(item.category), {
+                          className: "w-4 h-4",
+                        })}
                         {getCategoryLabel(item.category)}
                       </div>
                       <div className="h-px bg-gray-400"></div>
@@ -595,10 +611,8 @@ const TeacherDashboard = () => {
                   <div className="mt-2">
                     <p className="text-sm text-gray-500 text-center">
                       Estás a punto de cerrar sesión en{" "}
-                      <span className="font-semibold text-green-600">
-                        NidoPro
-                      </span>
-                      . ¿Estás seguro de que quieres continuar?
+                      <span className="font-semibold text-green-600">EDA</span>.
+                      ¿Estás seguro de que quieres continuar?
                     </p>
                   </div>
 

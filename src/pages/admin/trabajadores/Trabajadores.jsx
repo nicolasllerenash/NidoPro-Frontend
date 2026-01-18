@@ -1,33 +1,34 @@
-import React, { useState, useEffect } from 'react'; // <-- Agregué useEffect
-import { 
-  Users,
-  UserPlus
-} from 'lucide-react';
-import { useTrabajadores } from 'src/hooks/queries/useTrabajadoresQueries';
-import TablaTrabajadores from './tablas/TablaTrabajadores';
-import ModalAgregarTrabajador from './modales/ModalAgregarTrabajadorCompleto';
-import ModalVerTrabajador from './modales/ModalVerTrabajador';
-import ModalEditarTrabajador from './modales/ModalEditarTrabajador';
-import ModalEliminarTrabajador from './modales/ModalEliminarTrabajador';
+import React, { useState, useEffect } from "react";
+import { Users, UserPlus } from "lucide-react";
+import { useTrabajadores } from "src/hooks/queries/useTrabajadoresQueries";
+import TablaTrabajadores from "./tablas/TablaTrabajadores";
+import ModalAgregarTrabajador from "./modales/ModalAgregarTrabajador";
+import ModalVerTrabajador from "./modales/ModalVerTrabajador";
+import ModalEditarTrabajador from "./modales/ModalEditarTrabajador";
+import ModalEliminarTrabajador from "./modales/ModalEliminarTrabajador";
 
 const Trabajadores = () => {
   // Hook personalizado para gestión de trabajadores
-  const { 
+  const {
     data: trabajadoresData,
     isLoading: loading,
     error,
-    refetch: refreshTrabajadores
+    refetch: refreshTrabajadores,
   } = useTrabajadores();
 
   // Extraer el array de trabajadores
-  const trabajadores = Array.isArray(trabajadoresData) ? trabajadoresData :
-                       trabajadoresData?.trabajadores ? trabajadoresData.trabajadores :
-                       trabajadoresData?.data ? trabajadoresData.data : [];
+  const trabajadores = Array.isArray(trabajadoresData)
+    ? trabajadoresData
+    : trabajadoresData?.trabajadores
+    ? trabajadoresData.trabajadores
+    : trabajadoresData?.data
+    ? trabajadoresData.data
+    : [];
 
   // Calcular estadísticas localmente
   const statistics = {
     total: trabajadores.length,
-    active: trabajadores.filter(t => t.estaActivo).length
+    active: trabajadores.filter((t) => t.estaActivo).length,
   };
 
   // Estados locales solo para UI
@@ -38,21 +39,21 @@ const Trabajadores = () => {
   const [selectedTrabajador, setSelectedTrabajador] = useState(null);
 
   // --- Console.log para depuración ---
-  console.log('--- Renderizando Componente Trabajadores ---');
-  console.log('Estado de carga (loading):', loading);
-  console.log('Datos recibidos (trabajadoresData):', trabajadoresData);
-  console.log('Trabajadores procesados:', trabajadores);
-  console.log('Estadísticas calculadas:', statistics);
+  console.log("--- Renderizando Componente Trabajadores ---");
+  console.log("Estado de carga (loading):", loading);
+  console.log("Datos recibidos (trabajadoresData):", trabajadoresData);
+  console.log("Trabajadores procesados:", trabajadores);
+  console.log("Estadísticas calculadas:", statistics);
   if (error) {
-    console.error('Error del hook useTrabajadores:', error);
+    console.error("Error del hook useTrabajadores:", error);
   }
-  
+
   // Puedes usar useEffect para ver los cambios en los datos y el estado
   useEffect(() => {
-    console.log('El hook useTrabajadores ha actualizado sus datos.');
-    console.log('Datos actuales:', trabajadoresData);
-    console.log('Trabajadores procesados:', trabajadores);
-    console.log('Estadísticas actuales:', statistics);
+    console.log("El hook useTrabajadores ha actualizado sus datos.");
+    console.log("Datos actuales:", trabajadoresData);
+    console.log("Trabajadores procesados:", trabajadores);
+    console.log("Estadísticas actuales:", statistics);
   }, [trabajadoresData, trabajadores, statistics]);
 
   // Funciones para manejar las acciones de la tabla
@@ -76,11 +77,11 @@ const Trabajadores = () => {
   };
 
   const handleImport = () => {
-    console.log('Importar trabajadores');
+    console.log("Importar trabajadores");
   };
 
   const handleExport = () => {
-    console.log('Exportar trabajadores');
+    console.log("Exportar trabajadores");
   };
 
   return (
@@ -88,7 +89,9 @@ const Trabajadores = () => {
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestión de Trabajadores</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Gestión de Trabajadores
+            </h1>
             <p className="text-gray-600 mt-1">Administra los trabajadores</p>
           </div>
         </div>
@@ -99,18 +102,26 @@ const Trabajadores = () => {
             <div className="flex items-center">
               <Users className="w-8 h-8 text-blue-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-blue-600">Total Trabajadores</p>
-                <p className="text-2xl font-bold text-blue-900">{statistics.total}</p>
+                <p className="text-sm font-medium text-blue-600">
+                  Total Trabajadores
+                </p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {statistics.total}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-green-50 p-4 rounded-lg">
             <div className="flex items-center">
               <UserPlus className="w-8 h-8 text-green-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-600">Trabajadores Activos</p>
-                <p className="text-2xl font-bold text-green-900">{statistics.active}</p>
+                <p className="text-sm font-medium text-green-600">
+                  Trabajadores Activos
+                </p>
+                <p className="text-2xl font-bold text-green-900">
+                  {statistics.active}
+                </p>
               </div>
             </div>
           </div>

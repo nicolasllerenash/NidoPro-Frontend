@@ -87,7 +87,7 @@ const Login = () => {
       let userData;
       try {
         userData = await authService.login(formData);
-        toast.success('¡Bienvenido a NidoPro!');
+        toast.success('¡Bienvenido a EDA!');
       } catch (backendError) {
         console.warn('Backend no disponible, usando modo desarrollo:', backendError.message);
         // Fallback a modo desarrollo
@@ -414,7 +414,7 @@ const Login = () => {
                   isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                 }`} style={{ transitionDelay: '0.3s' }}>
                   <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    NidoPro
+                    EDA
                   </h3>
                   <p className="text-gray-600">
                     Accede a tu cuenta para continuar
@@ -551,7 +551,7 @@ const Login = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold bg-blue-600 bg-clip-text text-transparent">
-                    NidoPro
+                    EDA
                   </h1>
                   <p className="text-sm text-gray-600">Sistema Educativo</p>
                 </div>
@@ -562,7 +562,7 @@ const Login = () => {
                 <h2 className="text-4xl font-bold text-gray-800 mb-4 leading-tight">
                   Bienvenido a<br />
                   <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    NidoPro
+                    EDA
                   </span>
                 </h2>
                 <p className="text-lg text-gray-600 leading-relaxed">

@@ -1,6 +1,6 @@
 # Módulo de Pensiones - Padres
 
-Este módulo permite a los padres de familia visualizar y gestionar las pensiones de sus hijos en el sistema NidoPro.
+Este módulo permite a los padres de familia visualizar y gestionar las pensiones de sus hijos en el sistema EDA.
 
 ## 📁 Estructura del Módulo
 

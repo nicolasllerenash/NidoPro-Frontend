@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Search,
   Edit,
@@ -7,29 +7,37 @@ import {
   MapPin,
   Settings,
   BookOpen,
-  Eye
-} from 'lucide-react';
-import { useAulasAdmin, useUpdateAula } from '../../../hooks/queries/useAulasQueries';
-import ModalEditarAula from './modales/ModalEditarAula';
-import ModalAgregarAula from './modales/ModalAgregarAula';
+  Eye,
+} from "lucide-react";
+import {
+  useAulasAdmin,
+  useUpdateAula,
+} from "../../../hooks/queries/useAulasQueries";
+import ModalEditarAula from "./modales/ModalEditarAula";
+import ModalAgregarAula from "./modales/ModalAgregarAula";
 
 const Aulas = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [modalEditarAula, setModalEditarAula] = useState(false);
   const [modalAgregarAula, setModalAgregarAula] = useState(false);
   const [aulaSeleccionada, setAulaSeleccionada] = useState(null);
 
   // Hook para obtener aulas
-  const { data: aulas = [], isLoading: loadingAulas, error: errorAulas } = useAulasAdmin();
+  const {
+    data: aulas = [],
+    isLoading: loadingAulas,
+    error: errorAulas,
+  } = useAulasAdmin();
 
   // Hook para actualizar aulas
   const updateAulaMutation = useUpdateAula();
 
   // Filtrar aulas por búsqueda
-  const aulasFiltradas = aulas.filter(aula =>
-    aula.seccion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    aula.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    aula.ubicacion?.toLowerCase().includes(searchTerm.toLowerCase())
+  const aulasFiltradas = aulas.filter(
+    (aula) =>
+      aula.seccion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      aula.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      aula.ubicacion?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleEditarAula = (aula) => {
@@ -52,8 +60,12 @@ const Aulas = () => {
               <BookOpen className="w-8 h-8 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Aulas</h1>
-              <p className="text-gray-600">Administra las aulas del centro educativo</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gestión de Aulas
+              </h1>
+              <p className="text-gray-600">
+                Administra las aulas del centro educativo
+              </p>
             </div>
           </div>
           <button
@@ -97,7 +109,9 @@ const Aulas = () => {
             <div className="p-8 bg-gray-50 rounded-lg">
               <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 text-lg mb-4">
-                {searchTerm ? 'No se encontraron aulas con ese criterio de búsqueda' : 'No hay aulas registradas'}
+                {searchTerm
+                  ? "No se encontraron aulas con ese criterio de búsqueda"
+                  : "No hay aulas registradas"}
               </p>
               {!searchTerm && (
                 <button
@@ -119,7 +133,13 @@ const Aulas = () => {
                     Sección
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Capacidad Máxima
+                    Cantidad de Estudiantes
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Grado
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Descripción
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
@@ -146,9 +166,19 @@ const Aulas = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Users className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">
-                          {aula.cantidadEstudiantes || 0}
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                          {aula.cantidadEstudiantes || 0} estudiantes
                         </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {aula.idGrado?.grado || "Sin grado"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600">
+                        {aula.idGrado?.descripcion || "Sin descripción"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -29,7 +29,7 @@ const AIChat = () => {
     {
       id: 1,
       type: 'ai',
-      content: '🌟 ¡Hola! Soy tu **Asistente Pedagógico NidoPro** potenciado por ChatGPT.\n\n📚 Estoy especializado en ayudarte con:\n• Planificación de clases innovadoras\n• Estrategias de enseñanza efectivas\n• Manejo del aula y disciplina positiva\n• Evaluación y recursos educativos\n• Resolución de desafíos pedagógicos\n\n🎯 **¿En qué puedo ayudarte hoy?** Puedes preguntarme sobre cualquier tema educativo o usar las consultas rápidas de abajo.',
+      content: '🌟 ¡Hola! Soy tu **Asistente Pedagógico EDA** potenciado por ChatGPT.\n\n📚 Estoy especializado en ayudarte con:\n• Planificación de clases innovadoras\n• Estrategias de enseñanza efectivas\n• Manejo del aula y disciplina positiva\n• Evaluación y recursos educativos\n• Resolución de desafíos pedagógicos\n\n🎯 **¿En qué puedo ayudarte hoy?** Puedes preguntarme sobre cualquier tema educativo o usar las consultas rápidas de abajo.',
       timestamp: new Date(Date.now() - 60000)
     }
   ]);
@@ -166,7 +166,7 @@ const AIChat = () => {
       {
         id: 1,
         type: 'ai',
-        content: '🔄 **Conversación reiniciada**\n\n🌟 ¡Hola de nuevo! Soy tu **Asistente Pedagógico NidoPro**.\n\n¿En qué nuevo desafío educativo puedo ayudarte hoy?',
+        content: '🔄 **Conversación reiniciada**\n\n🌟 ¡Hola de nuevo! Soy tu **Asistente Pedagógico EDA**.\n\n¿En qué nuevo desafío educativo puedo ayudarte hoy?',
         timestamp: new Date()
       }
     ]);
@@ -414,7 +414,7 @@ const AIChat = () => {
                 <span className="sm:hidden">Error</span>
               </span>
             )}
-            <span className="hidden md:inline">NidoPro IA v2.1</span>
+            <span className="hidden md:inline">EDA IA v2.1</span>
           </div>
         </div>
       </div>

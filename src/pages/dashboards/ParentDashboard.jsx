@@ -126,6 +126,18 @@ const ParentDashboard = () => {
     return labels[category] || category;
   };
 
+  // Función para obtener el icono de categoría
+  const getCategoryIcon = (category) => {
+    const icons = {
+      dashboard: BarChart3,
+      herramientas: Bot,
+      academico: BookOpen,
+      gestion: UsersIcon,
+      financiero: DollarSign,
+    };
+    return icons[category] || BookOpen;
+  };
+
   // Datos del hijo/estudiante
   const studentData = {
     name: `${user?.nombre || ""} ${user?.apellido || ""}`,
@@ -571,9 +583,10 @@ const ParentDashboard = () => {
       >
         {/* Mobile close button */}
         <div className="flex items-center bg-yellow-600 justify-between p-7 border-b border-gray-200 lg:justify-start">
-          <div className="flex items-center space-x-3 ">
-            <User className="w-8 h-8 text-white" />
-            <span className="text-xl font-bold text-white">Nido Pro</span>
+          <div className="flex items-center space-x-3 mt-1">
+            <span className="text-xl font-bold text-white tracking-wider">
+              EDA
+            </span>
           </div>
           <button
             className="lg:hidden p-2 text-gray-400 hover:text-gray-600"
@@ -600,7 +613,10 @@ const ParentDashboard = () => {
                   {showCategorySeparator && (
                     <div className="my-4 px-4 ">
                       <div className="h-px bg-gray-400"></div>
-                      <div className="text-sm font-bold text-yellow-900 uppercase tracking-wider mt-2 mb-1">
+                      <div className="text-sm font-bold text-yellow-900 uppercase tracking-wider mt-2 mb-1 flex items-center gap-2">
+                        {React.createElement(getCategoryIcon(item.category), {
+                          className: "w-4 h-4",
+                        })}
                         {getCategoryLabel(item.category)}
                       </div>
                       <div className="h-px bg-gray-400"></div>

@@ -1,21 +1,22 @@
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none"
+  xmlns="http://www.w3.org/2000/svg">
   <!-- Fondo circular elegante -->
   <circle cx="60" cy="60" r="58" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  
+
   <!-- Círculo interior -->
   <circle cx="60" cy="60" r="45" fill="url(#gradient)" opacity="0.9"/>
-  
+
   <!-- Icono del nido (estilizado) -->
   <path d="M35 65 Q35 45 60 45 Q85 45 85 65 L85 75 Q85 85 75 85 L45 85 Q35 85 35 75 Z" fill="#ffffff" opacity="0.9"/>
-  
+
   <!-- Huevitos/niños representados como círculos -->
   <circle cx="50" cy="65" r="4" fill="#64748b"/>
   <circle cx="60" cy="62" r="4" fill="#64748b"/>
   <circle cx="70" cy="65" r="4" fill="#64748b"/>
-  
-  <!-- Texto NidoPro -->
-  <text x="60" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="#64748b">NidoPro</text>
-  
+
+  <!-- Texto EDA -->
+  <text x="60" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="600" fill="#64748b">EDA</text>
+
   <!-- Gradiente -->
   <defs>
     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">

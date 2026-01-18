@@ -47,7 +47,35 @@ api.interceptors.response.use(
  */
 export const pensionService = {
   /**
-   * Obtener todas las pensiones
+   * Obtener todas las pensiones desde el endpoint correcto
+   * @returns {Promise<Array>} Lista de pensiones
+   */
+  async getAllPensionesBase() {
+    try {
+      console.log('🔄 Obteniendo pensiones desde /pension...');
+      const response = await api.get('/pension');
+      console.log('✅ Respuesta del backend - pensiones base:', response.data);
+      
+      // Estructura esperada: { success: true, message: "...", info: { data: [...] } }
+      if (response.data?.info?.data && Array.isArray(response.data.info.data)) {
+        return response.data.info.data;
+      }
+      
+      // Fallback si la estructura es diferente
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      
+      console.warn('⚠️ Estructura de respuesta inesperada para /pension:', response.data);
+      return [];
+    } catch (error) {
+      console.error('❌ Error al obtener pensiones base:', error);
+      throw new Error(error.response?.data?.message || 'Error al obtener pensiones');
+    }
+  },
+
+  /**
+   * Obtener todas las pensiones (legacy - usando pension-estudiante)
    * @param {Object} filters - Filtros opcionales
    * @returns {Promise<Array>} Lista de pensiones
    */

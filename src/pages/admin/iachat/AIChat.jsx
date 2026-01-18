@@ -31,7 +31,7 @@ const AIChat = () => {
     {
       id: 1,
       type: 'ai',
-      content: '👩‍� ¡Hola Directora! Soy tu **Asistente Educativo NidoPro** especializado en jardines infantiles.\n\n🎨 Estoy aquí para ayudarte con:\n• Desarrollo infantil y actividades lúdicas\n• Mejora continua de profesores\n• Comunicación efectiva con padres\n• Gestión de conflictos en el aula\n• Planes de mejora educativa\n• Salud y seguridad infantil\n• Organización de eventos especiales\n• Evaluación del desarrollo infantil\n\n� **¿En qué puedo ayudarte hoy?** Como directora de kinder, sé que tienes muchos desafíos diarios. ¡Estoy aquí para apoyarte!',
+      content: '👩‍� ¡Hola Directora! Soy tu **Asistente Educativo EDA** especializado en jardines infantiles.\n\n🎨 Estoy aquí para ayudarte con:\n• Desarrollo infantil y actividades lúdicas\n• Mejora continua de profesores\n• Comunicación efectiva con padres\n• Gestión de conflictos en el aula\n• Planes de mejora educativa\n• Salud y seguridad infantil\n• Organización de eventos especiales\n• Evaluación del desarrollo infantil\n\n� **¿En qué puedo ayudarte hoy?** Como directora de kinder, sé que tienes muchos desafíos diarios. ¡Estoy aquí para apoyarte!',
       timestamp: new Date(Date.now() - 60000)
     }
   ]);
@@ -168,7 +168,7 @@ const AIChat = () => {
       {
         id: 1,
         type: 'ai',
-        content: '🔄 **Conversación reiniciada**\n\n👩‍� ¡Hola de nuevo Directora! Soy tu **Asistente Educativo NidoPro**.\n\n¿En qué nuevo desafío educativo puedo ayudarte hoy?',
+        content: '🔄 **Conversación reiniciada**\n\n👩‍� ¡Hola de nuevo Directora! Soy tu **Asistente Educativo EDA**.\n\n¿En qué nuevo desafío educativo puedo ayudarte hoy?',
         timestamp: new Date()
       }
     ]);
@@ -420,7 +420,7 @@ const AIChat = () => {
                 <span className="sm:hidden">Error</span>
               </span>
             )}
-            <span className="hidden md:inline">NidoPro IA v2.1</span>
+            <span className="hidden md:inline">EDA IA v2.1</span>
           </div>
         </div>
       </div>

@@ -1,22 +1,23 @@
 // src/services/api/trabajadorService.js
-import axios from 'axios';
-import { FirebaseStorageService } from './firebaseStorageService';
+import axios from "axios";
+import { FirebaseStorageService } from "./firebaseStorageService";
 
 // Base URL del API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://nidopro.up.railway.app/api/v1";
 
 // Configuración de axios
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Interceptor para agregar token de autenticación
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -31,35 +32,40 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Verificar si la respuesta contiene HTML en lugar de JSON
-    if (typeof response.data === 'string' && response.data.includes('<html>')) {
-      console.error('❌ Respuesta HTML detectada en trabajadorService');
+    if (typeof response.data === "string" && response.data.includes("<html>")) {
+      console.error("❌ Respuesta HTML detectada en trabajadorService");
       if (import.meta.env.PROD) {
         // En producción, crear una respuesta vacía en lugar de fallar
         return {
           ...response,
-          data: { trabajadores: [], data: [], info: { data: [] } }
+          data: { trabajadores: [], data: [], info: { data: [] } },
         };
       }
     }
     return response;
   },
   (error) => {
-    console.error('Error en la respuesta del API:', error);
-    
+    console.error("Error en la respuesta del API:", error);
+
     // Si el token expiró, redirigir al login (solo si no estamos ya en login)
-    if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
-      console.warn('🔐 Token expirado en trabajadorService, redirigiendo al login');
-      localStorage.removeItem('token');
-      localStorage.removeItem('auth-storage');
-      
+    if (
+      error.response?.status === 401 &&
+      !window.location.pathname.includes("/login")
+    ) {
+      console.warn(
+        "🔐 Token expirado en trabajadorService, redirigiendo al login"
+      );
+      localStorage.removeItem("token");
+      localStorage.removeItem("auth-storage");
+
       // En producción, usar reemplazo en lugar de asignación directa
       if (import.meta.env.PROD) {
-        window.location.replace('/login');
+        window.location.replace("/login");
       } else {
-        window.location.href = '/login';
+        window.location.href = "/login";
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -76,27 +82,32 @@ export const trabajadorService = {
   async getAllTrabajadores(filters = {}) {
     try {
       const params = new URLSearchParams();
-      
+
       // Agregar filtros a los parámetros
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (value !== undefined && value !== null && value !== "") {
           params.append(key, value);
         }
       });
-      
+
       const response = await api.get(`/trabajador?${params.toString()}`);
-      console.log('📋 Respuesta del backend:', response.data);
-      
+      console.log("📋 Respuesta del backend:", response.data);
+
       // Extraer el array de trabajadores de la respuesta
       // El backend tiene un typo: "sucess" en lugar de "success"
-      if ((response.data.success || response.data.sucess) && response.data.trabajadores) {
+      if (
+        (response.data.success || response.data.sucess) &&
+        response.data.trabajadores
+      ) {
         return response.data.trabajadores;
       }
-      
+
       return response.data;
     } catch (error) {
-      console.error('Error al obtener trabajadores:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener trabajadores');
+      console.error("Error al obtener trabajadores:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener trabajadores"
+      );
     }
   },
 
@@ -110,8 +121,10 @@ export const trabajadorService = {
       const response = await api.get(`/trabajador/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener trabajador:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener trabajador');
+      console.error("Error al obtener trabajador:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener trabajador"
+      );
     }
   },
 
@@ -122,29 +135,94 @@ export const trabajadorService = {
    */
   async getAulasPorTrabajador(idTrabajador) {
     try {
-      console.log('🏫 Obteniendo aulas del trabajador:', idTrabajador);
-      
+      console.log("🏫 Obteniendo aulas del trabajador:", idTrabajador);
+
       const response = await api.get(`/trabajador/aulas/${idTrabajador}`);
-      console.log('✅ Aulas del trabajador obtenidas:', response.data);
-      
+      console.log("✅ Aulas del trabajador obtenidas:", response.data);
+
       // Estructurar la respuesta para que sea consistente
       return {
         aulas: response.data?.aulas || response.data?.data || [],
-        success: true
+        success: true,
       };
     } catch (error) {
-      console.error('❌ Error al obtener aulas del trabajador:', error);
-      
+      console.error("❌ Error al obtener aulas del trabajador:", error);
+
       // Si es un error 404 (trabajador no encontrado), devolver array vacío
       if (error.response?.status === 404) {
-        console.log('ℹ️ Trabajador no encontrado o sin aulas asignadas');
+        console.log("ℹ️ Trabajador no encontrado o sin aulas asignadas");
         return {
           aulas: [],
-          success: true
+          success: true,
         };
       }
-      
-      throw new Error(error.response?.data?.message || 'Error al obtener aulas del trabajador');
+
+      throw new Error(
+        error.response?.data?.message || "Error al obtener aulas del trabajador"
+      );
+    }
+  },
+
+  /**
+   * Crear un nuevo trabajador SIMPLE (sin contrato ni sueldo)
+   * @param {Object} trabajadorData - Datos básicos del trabajador
+   * @returns {Promise<Object>} Trabajador creado
+   */
+  async createTrabajadorSimple(trabajadorData) {
+    try {
+      console.log("📤 Creando trabajador simple:", trabajadorData);
+
+      // Validar solo campos requeridos para el endpoint simple
+      const requiredFields = [
+        "nombre",
+        "apellido",
+        "tipoDocumento",
+        "nroDocumento",
+        "idRol",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !trabajadorData[field]
+      );
+
+      if (missingFields.length > 0) {
+        throw new Error(
+          `Campos requeridos faltantes: ${missingFields.join(", ")}`
+        );
+      }
+
+      // Preparar payload simple según el endpoint POST /trabajador
+      const payload = {
+        nombre: trabajadorData.nombre.trim(),
+        apellido: trabajadorData.apellido.trim(),
+        tipoDocumento: trabajadorData.tipoDocumento,
+        nroDocumento: trabajadorData.nroDocumento.trim(),
+        idRol: trabajadorData.idRol,
+        correo: trabajadorData.correo?.trim() || null,
+        telefono: trabajadorData.telefono?.trim() || null,
+        direccion: trabajadorData.direccion?.trim() || null,
+        estaActivo:
+          trabajadorData.estaActivo !== undefined
+            ? trabajadorData.estaActivo
+            : true,
+        imagenUrl: trabajadorData.imagenUrl || null,
+      };
+
+      console.log("📤 Payload para endpoint /trabajador:", payload);
+
+      const response = await api.post("/trabajador", payload);
+      console.log("✅ Trabajador creado exitosamente:", response.data);
+
+      return response.data;
+    } catch (error) {
+      console.error("❌ Error al crear trabajador simple:", error);
+
+      if (error.response?.data) {
+        console.error("Detalles del error del backend:", error.response.data);
+      }
+
+      throw new Error(
+        error.response?.data?.message || "Error al crear trabajador"
+      );
     }
   },
 
@@ -155,14 +233,30 @@ export const trabajadorService = {
    */
   async createTrabajador(trabajadorData) {
     try {
-      console.log('📤 Enviando datos del trabajador al backend:', trabajadorData);
+      console.log(
+        "📤 Enviando datos del trabajador al backend:",
+        trabajadorData
+      );
 
       // Validar datos requeridos según el backend
-      const requiredFields = ['nombre', 'apellido', 'tipoDocumento', 'nroDocumento', 'direccion', 'correo', 'telefono', 'idRol'];
-      const missingFields = requiredFields.filter(field => !trabajadorData[field]);
+      const requiredFields = [
+        "nombre",
+        "apellido",
+        "tipoDocumento",
+        "nroDocumento",
+        "direccion",
+        "correo",
+        "telefono",
+        "idRol",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !trabajadorData[field]
+      );
 
       if (missingFields.length > 0) {
-        throw new Error(`Campos requeridos faltantes: ${missingFields.join(', ')}`);
+        throw new Error(
+          `Campos requeridos faltantes: ${missingFields.join(", ")}`
+        );
       }
 
       // Extraer archivos del formulario si existen
@@ -172,54 +266,56 @@ export const trabajadorService = {
 
       // Si hay archivos, subirlos a Firebase Storage
       if (archivos && archivos.length > 0) {
-        console.log('📤 Iniciando subida de archivos a Firebase...');
+        console.log("📤 Iniciando subida de archivos a Firebase...");
 
         // Filtrar archivos por tipo (contrato y firmado)
-        const archivoContrato = Array.from(archivos).find(file =>
-          file.name.toLowerCase().includes('contrato') ||
-          file.name.toLowerCase().includes('contract')
+        const archivoContrato = Array.from(archivos).find(
+          (file) =>
+            file.name.toLowerCase().includes("contrato") ||
+            file.name.toLowerCase().includes("contract")
         );
 
-        const archivoFirmado = Array.from(archivos).find(file =>
-          file.name.toLowerCase().includes('firmado') ||
-          file.name.toLowerCase().includes('signed') ||
-          file.name.toLowerCase().includes('firma')
+        const archivoFirmado = Array.from(archivos).find(
+          (file) =>
+            file.name.toLowerCase().includes("firmado") ||
+            file.name.toLowerCase().includes("signed") ||
+            file.name.toLowerCase().includes("firma")
         );
 
         // Subir archivo de contrato si existe
         if (archivoContrato) {
-          console.log('📄 Subiendo archivo de contrato...');
+          console.log("📄 Subiendo archivo de contrato...");
           const contratoResult = await FirebaseStorageService.uploadFile(
             archivoContrato,
-            'trabajadores/contratos',
-            trabajadorData.correo || 'anonymous'
+            "trabajadores/contratos",
+            trabajadorData.correo || "anonymous"
           );
           archivoContratoUrl = contratoResult.url;
-          console.log('✅ Archivo de contrato subido:', contratoResult.url);
+          console.log("✅ Archivo de contrato subido:", contratoResult.url);
         }
 
         // Subir archivo firmado si existe
         if (archivoFirmado) {
-          console.log('📝 Subiendo archivo firmado...');
+          console.log("📝 Subiendo archivo firmado...");
           const firmadoResult = await FirebaseStorageService.uploadFile(
             archivoFirmado,
-            'trabajadores/firmados',
-            trabajadorData.correo || 'anonymous'
+            "trabajadores/firmados",
+            trabajadorData.correo || "anonymous"
           );
           archivoFirmadoUrl = firmadoResult.url;
-          console.log('✅ Archivo firmado subido:', firmadoResult.url);
+          console.log("✅ Archivo firmado subido:", firmadoResult.url);
         }
 
         // Si no se encontraron archivos específicos, subir el primer archivo como contrato
         if (!archivoContrato && !archivoFirmado && archivos.length > 0) {
-          console.log('📄 Subiendo primer archivo como contrato...');
+          console.log("📄 Subiendo primer archivo como contrato...");
           const contratoResult = await FirebaseStorageService.uploadFile(
             archivos[0],
-            'trabajadores/contratos',
-            trabajadorData.correo || 'anonymous'
+            "trabajadores/contratos",
+            trabajadorData.correo || "anonymous"
           );
           archivoContratoUrl = contratoResult.url;
-          console.log('✅ Archivo subido como contrato:', contratoResult.url);
+          console.log("✅ Archivo subido como contrato:", contratoResult.url);
         }
       }
 
@@ -228,55 +324,76 @@ export const trabajadorService = {
         idTrabajador: null,
         nombre: trabajadorData.nombre.trim(),
         apellido: trabajadorData.apellido.trim(),
-        tipoDocumento: trabajadorData.tipoDocumento || 'DNI',
+        tipoDocumento: trabajadorData.tipoDocumento || "DNI",
         nroDocumento: trabajadorData.nroDocumento.trim(),
         direccion: trabajadorData.direccion.trim(),
         correo: trabajadorData.correo.trim(),
         telefono: trabajadorData.telefono.trim(),
-        estaActivo: trabajadorData.estaActivo !== undefined ? trabajadorData.estaActivo : true,
+        estaActivo:
+          trabajadorData.estaActivo !== undefined
+            ? trabajadorData.estaActivo
+            : true,
         imagenUrl: null,
         idRol: trabajadorData.idRol, // Usar el rol seleccionado en el formulario
 
         // Objeto contrato anidado con URLs de archivos
-        contrato: trabajadorData.idTipoContrato ? {
-          idTipoContrato: trabajadorData.idTipoContrato,
-          numeroContrato: trabajadorData.numeroContrato,
-          fechaInicio: trabajadorData.fechaInicio,
-          fechaFin: trabajadorData.fechaFin,
-          jornadaLaboral: ["COMPLETA", "PARCIAL", "FLEXIBLE"].includes(trabajadorData.jornadaLaboral?.toUpperCase())
-            ? trabajadorData.jornadaLaboral.toUpperCase()
-            : "COMPLETA",
-          horasSemanales: parseInt(trabajadorData.horasSemanales) || 40,
-          cargoContrato: trabajadorData.cargoContrato || trabajadorData.descripcionFunciones || "Trabajador",
-          descripcionFunciones: trabajadorData.descripcionFunciones || "",
-          lugarTrabajo: trabajadorData.lugarTrabajo || "",
-          estadoContrato: "ACTIVO",
-          fechaFinalizacionReal: trabajadorData.fechaFin,
-          archivoContratoUrl: archivoContratoUrl,
-          archivoFirmadoUrl: archivoFirmadoUrl,
-          renovacionAutomatica: trabajadorData.renovacion || false,
-          diasAvisoRenovacion: parseInt(trabajadorData.diasAviso) || 30,
-          fechaAprobacion: trabajadorData.fechaAprobacion,
-          creadoEn: new Date().toISOString().split('T')[0]
-        } : null,
+        contrato: trabajadorData.idTipoContrato
+          ? {
+              idTipoContrato: trabajadorData.idTipoContrato,
+              numeroContrato: trabajadorData.numeroContrato,
+              fechaInicio: trabajadorData.fechaInicio,
+              fechaFin: trabajadorData.fechaFin,
+              jornadaLaboral: ["COMPLETA", "PARCIAL", "FLEXIBLE"].includes(
+                trabajadorData.jornadaLaboral?.toUpperCase()
+              )
+                ? trabajadorData.jornadaLaboral.toUpperCase()
+                : "COMPLETA",
+              horasSemanales: parseInt(trabajadorData.horasSemanales) || 40,
+              cargoContrato:
+                trabajadorData.cargoContrato ||
+                trabajadorData.descripcionFunciones ||
+                "Trabajador",
+              descripcionFunciones: trabajadorData.descripcionFunciones || "",
+              lugarTrabajo: trabajadorData.lugarTrabajo || "",
+              estadoContrato: "ACTIVO",
+              fechaFinalizacionReal: trabajadorData.fechaFin,
+              archivoContratoUrl: archivoContratoUrl,
+              archivoFirmadoUrl: archivoFirmadoUrl,
+              renovacionAutomatica: trabajadorData.renovacion || false,
+              diasAvisoRenovacion: parseInt(trabajadorData.diasAviso) || 30,
+              fechaAprobacion: trabajadorData.fechaAprobacion,
+              creadoEn: new Date().toISOString().split("T")[0],
+            }
+          : null,
 
         // Objeto sueldoBase anidado
-        sueldoBase: trabajadorData.sueldoBase ? {
-          sueldoBase: parseFloat(trabajadorData.sueldoBase).toFixed(2),
-          bonificacionFamiliar: trabajadorData.bonificacion ? parseFloat(trabajadorData.bonificacion).toFixed(2) : "0.00",
-          asignacionFamiliar: trabajadorData.asignacion ? parseFloat(trabajadorData.asignacion).toFixed(2) : "0.00",
-          fechaAsignacion: trabajadorData.fechaAsignacion,
-          fechaVigenciaDesde: trabajadorData.fechaVigenciaDesde,
-          fechaVigenciaHasta: trabajadorData.fechaHasta,
-          observaciones: trabajadorData.observacionesSueldo || "Sueldo inicial de contratación",
-          estaActivo: trabajadorData.estaActivoSueldo !== undefined ? trabajadorData.estaActivoSueldo : true,
-          creadoPor: "459b0eb9-1a9f-474d-91b1-3c3a037673cd",
-          actualizadoPor: null
-        } : null
+        sueldoBase: trabajadorData.sueldoBase
+          ? {
+              sueldoBase: parseFloat(trabajadorData.sueldoBase).toFixed(2),
+              bonificacionFamiliar: trabajadorData.bonificacion
+                ? parseFloat(trabajadorData.bonificacion).toFixed(2)
+                : "0.00",
+              asignacionFamiliar: trabajadorData.asignacion
+                ? parseFloat(trabajadorData.asignacion).toFixed(2)
+                : "0.00",
+              fechaAsignacion: trabajadorData.fechaAsignacion,
+              fechaVigenciaDesde: trabajadorData.fechaVigenciaDesde,
+              fechaVigenciaHasta: trabajadorData.fechaHasta,
+              observaciones:
+                trabajadorData.observacionesSueldo ||
+                "Sueldo inicial de contratación",
+              estaActivo:
+                trabajadorData.estaActivoSueldo !== undefined
+                  ? trabajadorData.estaActivoSueldo
+                  : true,
+              creadoPor: "459b0eb9-1a9f-474d-91b1-3c3a037673cd",
+              actualizadoPor: null,
+            }
+          : null,
       };
 
-      const response = await api.post('/trabajador/transactional', payload);
-      console.log('✅ Trabajador creado exitosamente:', response.data);
+      const response = await api.post("/trabajador/transactional", payload);
+      console.log("✅ Trabajador creado exitosamente:", response.data);
 
       // Extraer el trabajador de la respuesta del backend
       if (response.data.trabajador) {
@@ -285,14 +402,16 @@ export const trabajadorService = {
 
       return response.data;
     } catch (error) {
-      console.error('❌ Error al crear trabajador:', error);
+      console.error("❌ Error al crear trabajador:", error);
 
       // Si hay error y ya se subieron archivos, intentar limpiarlos
       if (error.response?.data) {
-        console.error('Detalles del error del backend:', error.response.data);
+        console.error("Detalles del error del backend:", error.response.data);
       }
 
-      throw new Error(error.response?.data?.message || 'Error al crear trabajador');
+      throw new Error(
+        error.response?.data?.message || "Error al crear trabajador"
+      );
     }
   },
 
@@ -304,8 +423,8 @@ export const trabajadorService = {
    */
   async updateTrabajador(id, trabajadorData) {
     try {
-      console.log('📤 Actualizando trabajador:', id, trabajadorData);
-      
+      console.log("📤 Actualizando trabajador:", id, trabajadorData);
+
       // Preparar datos para el backend según el esquema del endpoint PATCH /api/v1/trabajador/{id}
       const payload = {
         nombre: trabajadorData.nombre?.trim(),
@@ -317,30 +436,32 @@ export const trabajadorService = {
         nroDocumento: trabajadorData.nroDocumento?.trim(),
         fechaNacimiento: trabajadorData.fechaNacimiento,
         idRol: trabajadorData.idRol,
-        estaActivo: trabajadorData.estaActivo
+        estaActivo: trabajadorData.estaActivo,
       };
 
       // Remover campos undefined para no enviar datos innecesarios
-      Object.keys(payload).forEach(key => {
-        if (payload[key] === undefined || payload[key] === '') {
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined || payload[key] === "") {
           delete payload[key];
         }
       });
 
-      console.log('📋 Payload a enviar:', payload);
+      console.log("📋 Payload a enviar:", payload);
 
       const response = await api.patch(`/trabajador/${id}`, payload);
-      console.log('✅ Trabajador actualizado exitosamente:', response.data);
+      console.log("✅ Trabajador actualizado exitosamente:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al actualizar trabajador:', error);
-      console.error('❌ Detalles del error:', {
+      console.error("❌ Error al actualizar trabajador:", error);
+      console.error("❌ Detalles del error:", {
         message: error.message,
         status: error.response?.status,
         statusText: error.response?.statusText,
-        data: error.response?.data
+        data: error.response?.data,
       });
-      throw new Error(error.response?.data?.message || 'Error al actualizar trabajador');
+      throw new Error(
+        error.response?.data?.message || "Error al actualizar trabajador"
+      );
     }
   },
 
@@ -352,8 +473,8 @@ export const trabajadorService = {
    */
   async updateTeacher(id, teacherData) {
     try {
-      console.log('📤 Actualizando profesor:', id, teacherData);
-      
+      console.log("📤 Actualizando profesor:", id, teacherData);
+
       // Preparar datos para el backend
       const payload = {
         name: teacherData.name?.trim(),
@@ -362,34 +483,43 @@ export const trabajadorService = {
         address: teacherData.address?.trim(),
         subject: teacherData.subject,
         degree: teacherData.degree?.trim(),
-        experience: teacherData.experience ? Number(teacherData.experience) : undefined,
+        experience: teacherData.experience
+          ? Number(teacherData.experience)
+          : undefined,
         schedule: teacherData.schedule,
-        specializations: teacherData.specializations ? (
-          Array.isArray(teacherData.specializations) 
-            ? teacherData.specializations 
-            : teacherData.specializations.split(',').map(s => s.trim()).filter(s => s)
-        ) : undefined,
+        specializations: teacherData.specializations
+          ? Array.isArray(teacherData.specializations)
+            ? teacherData.specializations
+            : teacherData.specializations
+                .split(",")
+                .map((s) => s.trim())
+                .filter((s) => s)
+          : undefined,
         notes: teacherData.notes?.trim(),
         photo: teacherData.photo,
         status: teacherData.status,
         rating: teacherData.rating ? Number(teacherData.rating) : undefined,
-        students: teacherData.students ? Number(teacherData.students) : undefined,
-        classes: teacherData.classes
+        students: teacherData.students
+          ? Number(teacherData.students)
+          : undefined,
+        classes: teacherData.classes,
       };
 
       // Remover campos undefined
-      Object.keys(payload).forEach(key => {
+      Object.keys(payload).forEach((key) => {
         if (payload[key] === undefined) {
           delete payload[key];
         }
       });
 
       const response = await api.put(`/teachers/${id}`, payload);
-      console.log('✅ Profesor actualizado exitosamente:', response.data);
+      console.log("✅ Profesor actualizado exitosamente:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al actualizar profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al actualizar profesor');
+      console.error("❌ Error al actualizar profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al actualizar profesor"
+      );
     }
   },
 
@@ -401,17 +531,22 @@ export const trabajadorService = {
    */
   async toggleTrabajadorStatus(id, newStatus) {
     try {
-      console.log(`🔄 Cambiando estado del trabajador ID: ${id} a ${newStatus}`);
-      
-      const response = await api.patch(`/trabajador/${id}`, { 
-        estaActivo: newStatus 
+      console.log(
+        `🔄 Cambiando estado del trabajador ID: ${id} a ${newStatus}`
+      );
+
+      const response = await api.patch(`/trabajador/${id}`, {
+        estaActivo: newStatus,
       });
-      
-      console.log('✅ Estado del trabajador actualizado:', response.data);
+
+      console.log("✅ Estado del trabajador actualizado:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al cambiar estado del trabajador:', error);
-      throw new Error(error.response?.data?.message || 'Error al cambiar estado del trabajador');
+      console.error("❌ Error al cambiar estado del trabajador:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al cambiar estado del trabajador"
+      );
     }
   },
 
@@ -423,13 +558,15 @@ export const trabajadorService = {
    */
   async changeTeacherStatus(id, status) {
     try {
-      console.log('🔄 Cambiando estado del profesor:', id, status);
+      console.log("🔄 Cambiando estado del profesor:", id, status);
       const response = await api.patch(`/teachers/${id}/status`, { status });
-      console.log('✅ Estado cambiado exitosamente:', response.data);
+      console.log("✅ Estado cambiado exitosamente:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al cambiar estado del profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al cambiar estado del profesor');
+      console.error("❌ Error al cambiar estado del profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al cambiar estado del profesor"
+      );
     }
   },
 
@@ -440,11 +577,16 @@ export const trabajadorService = {
    */
   async getTeachersBySubject(subject) {
     try {
-      const response = await api.get(`/teachers/subject/${encodeURIComponent(subject)}`);
+      const response = await api.get(
+        `/teachers/subject/${encodeURIComponent(subject)}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener profesores por materia:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener profesores por materia');
+      console.error("Error al obtener profesores por materia:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al obtener profesores por materia"
+      );
     }
   },
 
@@ -455,11 +597,16 @@ export const trabajadorService = {
    */
   async getTeachersBySchedule(schedule) {
     try {
-      const response = await api.get(`/teachers/schedule/${encodeURIComponent(schedule)}`);
+      const response = await api.get(
+        `/teachers/schedule/${encodeURIComponent(schedule)}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al obtener profesores por horario:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener profesores por horario');
+      console.error("Error al obtener profesores por horario:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al obtener profesores por horario"
+      );
     }
   },
 
@@ -470,11 +617,15 @@ export const trabajadorService = {
    */
   async searchTeachers(query) {
     try {
-      const response = await api.get(`/teachers/search?q=${encodeURIComponent(query)}`);
+      const response = await api.get(
+        `/teachers/search?q=${encodeURIComponent(query)}`
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al buscar profesores:', error);
-      throw new Error(error.response?.data?.message || 'Error al buscar profesores');
+      console.error("Error al buscar profesores:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al buscar profesores"
+      );
     }
   },
 
@@ -488,8 +639,10 @@ export const trabajadorService = {
       const response = await api.get(`/teachers/${teacherId}/classes`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener clases del profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener clases del profesor');
+      console.error("Error al obtener clases del profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener clases del profesor"
+      );
     }
   },
 
@@ -501,11 +654,15 @@ export const trabajadorService = {
    */
   async assignClassesToTeacher(teacherId, classIds) {
     try {
-      const response = await api.post(`/teachers/${teacherId}/classes`, { classIds });
+      const response = await api.post(`/teachers/${teacherId}/classes`, {
+        classIds,
+      });
       return response.data;
     } catch (error) {
-      console.error('Error al asignar clases al profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al asignar clases al profesor');
+      console.error("Error al asignar clases al profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al asignar clases al profesor"
+      );
     }
   },
 
@@ -517,10 +674,14 @@ export const trabajadorService = {
    */
   async removeClassesFromTeacher(teacherId, classIds) {
     try {
-      await api.delete(`/teachers/${teacherId}/classes`, { data: { classIds } });
+      await api.delete(`/teachers/${teacherId}/classes`, {
+        data: { classIds },
+      });
     } catch (error) {
-      console.error('Error al remover clases del profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al remover clases del profesor');
+      console.error("Error al remover clases del profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al remover clases del profesor"
+      );
     }
   },
 
@@ -532,18 +693,26 @@ export const trabajadorService = {
    */
   async updateTeacherRating(teacherId, rating) {
     try {
-      console.log('🔄 Actualizando calificación del profesor:', teacherId, rating);
-      
+      console.log(
+        "🔄 Actualizando calificación del profesor:",
+        teacherId,
+        rating
+      );
+
       if (rating < 1 || rating > 5) {
-        throw new Error('La calificación debe estar entre 1 y 5');
+        throw new Error("La calificación debe estar entre 1 y 5");
       }
-      
-      const response = await api.patch(`/teachers/${teacherId}/rating`, { rating });
-      console.log('✅ Calificación actualizada exitosamente:', response.data);
+
+      const response = await api.patch(`/teachers/${teacherId}/rating`, {
+        rating,
+      });
+      console.log("✅ Calificación actualizada exitosamente:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al actualizar calificación:', error);
-      throw new Error(error.response?.data?.message || 'Error al actualizar calificación');
+      console.error("❌ Error al actualizar calificación:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al actualizar calificación"
+      );
     }
   },
 
@@ -557,8 +726,10 @@ export const trabajadorService = {
       const response = await api.get(`/teachers/${teacherId}/schedule`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener horario del profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener horario del profesor');
+      console.error("Error al obtener horario del profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener horario del profesor"
+      );
     }
   },
 
@@ -568,11 +739,13 @@ export const trabajadorService = {
    */
   async getTeacherStats() {
     try {
-      const response = await api.get('/teachers/stats');
+      const response = await api.get("/teachers/stats");
       return response.data;
     } catch (error) {
-      console.error('Error al obtener estadísticas:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener estadísticas');
+      console.error("Error al obtener estadísticas:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener estadísticas"
+      );
     }
   },
 
@@ -586,8 +759,11 @@ export const trabajadorService = {
       const response = await api.get(`/teachers/${teacherId}/evaluations`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener evaluaciones del profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener evaluaciones del profesor');
+      console.error("Error al obtener evaluaciones del profesor:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al obtener evaluaciones del profesor"
+      );
     }
   },
 
@@ -599,11 +775,16 @@ export const trabajadorService = {
    */
   async createTeacherEvaluation(teacherId, evaluationData) {
     try {
-      const response = await api.post(`/teachers/${teacherId}/evaluations`, evaluationData);
+      const response = await api.post(
+        `/teachers/${teacherId}/evaluations`,
+        evaluationData
+      );
       return response.data;
     } catch (error) {
-      console.error('Error al crear evaluación:', error);
-      throw new Error(error.response?.data?.message || 'Error al crear evaluación');
+      console.error("Error al crear evaluación:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al crear evaluación"
+      );
     }
   },
 
@@ -614,16 +795,21 @@ export const trabajadorService = {
    */
   async exportTeachersToCSV(filters = {}) {
     try {
-      console.log('📤 Exportando profesores a CSV...');
+      console.log("📤 Exportando profesores a CSV...");
       const params = new URLSearchParams(filters);
-      const response = await api.get(`/teachers/export/csv?${params.toString()}`, {
-        responseType: 'blob'
-      });
-      console.log('✅ Exportación completada');
+      const response = await api.get(
+        `/teachers/export/csv?${params.toString()}`,
+        {
+          responseType: "blob",
+        }
+      );
+      console.log("✅ Exportación completada");
       return response.data;
     } catch (error) {
-      console.error('❌ Error al exportar profesores:', error);
-      throw new Error(error.response?.data?.message || 'Error al exportar profesores');
+      console.error("❌ Error al exportar profesores:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al exportar profesores"
+      );
     }
   },
 
@@ -634,20 +820,22 @@ export const trabajadorService = {
    */
   async importTeachersFromCSV(file) {
     try {
-      console.log('📥 Importando profesores desde CSV...');
+      console.log("📥 Importando profesores desde CSV...");
       const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await api.post('/teachers/import/csv', formData, {
+      formData.append("file", file);
+
+      const response = await api.post("/teachers/import/csv", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
-      console.log('✅ Importación completada:', response.data);
+      console.log("✅ Importación completada:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al importar profesores:', error);
-      throw new Error(error.response?.data?.message || 'Error al importar profesores');
+      console.error("❌ Error al importar profesores:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al importar profesores"
+      );
     }
   },
 
@@ -658,15 +846,21 @@ export const trabajadorService = {
    */
   async deleteTrabajador(id) {
     try {
-      console.log('🗑️ Eliminando/desactivando trabajador:', id);
-      
+      console.log("🗑️ Eliminando/desactivando trabajador:", id);
+
       const response = await api.delete(`/trabajador/${id}`);
-      console.log('✅ Trabajador eliminado/desactivado exitosamente:', response.data);
-      
+      console.log(
+        "✅ Trabajador eliminado/desactivado exitosamente:",
+        response.data
+      );
+
       return response.data;
     } catch (error) {
-      console.error('❌ Error al eliminar/desactivar trabajador:', error);
-      throw new Error(error.response?.data?.message || 'Error al eliminar/desactivar trabajador');
+      console.error("❌ Error al eliminar/desactivar trabajador:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al eliminar/desactivar trabajador"
+      );
     }
   },
 
@@ -677,15 +871,21 @@ export const trabajadorService = {
    */
   async toggleTrabajadorStatus(id) {
     try {
-      console.log('🔄 Cambiando estado del trabajador:', id);
-      
+      console.log("🔄 Cambiando estado del trabajador:", id);
+
       const response = await api.delete(`/trabajador/${id}`);
-      console.log('✅ Estado del trabajador cambiado exitosamente:', response.data);
-      
+      console.log(
+        "✅ Estado del trabajador cambiado exitosamente:",
+        response.data
+      );
+
       return response.data;
     } catch (error) {
-      console.error('❌ Error al cambiar estado del trabajador:', error);
-      throw new Error(error.response?.data?.message || 'Error al cambiar estado del trabajador');
+      console.error("❌ Error al cambiar estado del trabajador:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al cambiar estado del trabajador"
+      );
     }
   },
 };

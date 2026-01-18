@@ -5,9 +5,9 @@ import { getStorage } from "firebase/storage";
 // Pega el bloque de código aquí
 const firebaseConfig = {
   apiKey: "AIzaSyCjToz31WKbe-UYx99iQ1qQx2DT83BRBaM",
-  authDomain: "nidoprov1.firebaseapp.com",
-  projectId: "nidoprov1",
-  storageBucket: "nidoprov1.firebasestorage.app",
+  authDomain: "EDAv1.firebaseapp.com",
+  projectId: "EDAv1",
+  storageBucket: "EDAv1.firebasestorage.app",
   messagingSenderId: "735400327770",
   appId: "1:735400327770:web:f93c7bb3e8db86c13af663",
   measurementId: "G-LBYK86LSR4"

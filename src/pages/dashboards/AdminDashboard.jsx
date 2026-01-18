@@ -20,7 +20,7 @@ import {
   Settings,
   School,
   LogOut,
-  BanknoteArrowUp,
+  Banknote,
   CircleUser,
   Baby,
   Search,
@@ -100,37 +100,95 @@ const AdminDashboard = () => {
   }, []);
 
   const menuItems = [
-    // 📊 DASHBOARD
+    // 📊 DASHBOARD PRINCIPAL
     {
       id: "overview",
-      label: "Resumen General",
+      label: "Panel Principal",
       icon: BarChart3,
       category: "dashboard",
     },
 
-    // 🤖 HERRAMIENTAS EDUCATIVAS
+    // 👥 GESTIÓN DE PERSONAS (Lo más usado día a día)
     {
-      id: "ai-chat",
-      label: "Asistente IA",
-      icon: MessageCircle,
-      category: "herramientas",
+      id: "students",
+      label: "Estudiantes",
+      icon: CircleUser,
+      category: "personas",
+    },
+    {
+      id: "parents",
+      label: "Padres de Familia",
+      icon: UserCheck,
+      category: "personas",
+    },
+    {
+      id: "trabajadores",
+      label: "Trabajadores",
+      icon: UsersIcon,
+      category: "personas",
     },
 
-    // 💰 FINANZAS
+    // 📚 GESTIÓN ACADÉMICA (Operaciones diarias)
+    {
+      id: "matricula",
+      label: "Matrícula",
+      icon: GraduationCap,
+      category: "academico",
+    },
+    {
+      id: "asignacion-aula",
+      label: "Asignación de Aulas",
+      icon: School,
+      category: "academico",
+    },
+    {
+      id: "asignacion-cursos",
+      label: "Asignación de Cursos",
+      icon: UserCheck,
+      category: "academico",
+    },
+    {
+      id: "planificaciones",
+      label: "Planificaciones",
+      icon: FileText,
+      category: "academico",
+    },
+    {
+      id: "cronogramas",
+      label: "Cronogramas",
+      icon: Clock,
+      category: "academico",
+    },
+
+    // 📝 EVALUACIÓN Y SEGUIMIENTO
+    {
+      id: "evaluacion-docente",
+      label: "Comentarios Docente",
+      icon: Award,
+      category: "evaluacion",
+    },
+    {
+      id: "bimestral-docente",
+      label: "Evaluación Bimestral",
+      icon: ClipboardList,
+      category: "evaluacion",
+    },
+
+    // 💰 GESTIÓN FINANCIERA (Importante para admin)
     {
       id: "finances",
-      label: "Finanzas",
+      label: "Caja y Movimientos",
       icon: DollarSign,
       category: "finanzas",
     },
     {
       id: "pensiones",
       label: "Pensiones",
-      icon: BanknoteArrowUp,
+      icon: Banknote,
       category: "finanzas",
     },
 
-    // 👥 GESTIÓN DE PERSONAS
+    // � GESTIÓN DE PERSONAS
     {
       id: "students",
       label: "Estudiantes",
@@ -164,21 +222,9 @@ const AdminDashboard = () => {
       category: "academico",
     },
     {
-      id: "cursos",
-      label: "Gestión de Cursos",
-      icon: BookOpen,
-      category: "academico",
-    },
-    {
       id: "asignacion-cursos",
       label: "Asignación de Cursos",
       icon: UserCheck,
-      category: "academico",
-    },
-    {
-      id: "grados",
-      label: "Grados Académicos",
-      icon: School,
       category: "academico",
     },
     {
@@ -190,25 +236,13 @@ const AdminDashboard = () => {
     {
       id: "cronogramas",
       label: "Cronogramas",
-      icon: Calendar,
+      icon: Clock,
       category: "academico",
     },
     {
       id: "evaluacion-docente",
       label: "Comentario Docente",
       icon: Award,
-      category: "academico",
-    },
-    {
-      id: "bimestral-docente",
-      label: "Bimestral Docente",
-      icon: Award,
-      category: "academico",
-    },
-    {
-      id: "anio-escolar",
-      label: "Año Escolar",
-      icon: Calendar,
       category: "academico",
     },
 
@@ -244,6 +278,60 @@ const AdminDashboard = () => {
       label: "Tipos de Seguro",
       icon: Shield,
       category: "administrativo",
+    },
+    {
+      id: "reports",
+      label: "Reportes",
+      icon: BarChart3,
+      category: "reportes",
+    },
+    {
+      id: "ai-chat",
+      label: "Asistente IA",
+      icon: MessageCircle,
+      category: "herramientas",
+    },
+    {
+      id: "users",
+      label: "Usuarios del Sistema",
+      icon: UsersIcon,
+      category: "usuarios",
+    },
+    {
+      id: "roles",
+      label: "Roles y Permisos",
+      icon: Shield,
+      category: "usuarios",
+    },
+    {
+      id: "anio-escolar",
+      label: "Periodo Escolar",
+      icon: Calendar,
+      category: "configuracion",
+    },
+    {
+      id: "grados",
+      label: "Grados Académicos",
+      icon: School,
+      category: "configuracion",
+    },
+    {
+      id: "cursos",
+      label: "Cursos y Materias",
+      icon: BookOpen,
+      category: "configuracion",
+    },
+    {
+      id: "aulas",
+      label: "Aulas y Espacios",
+      icon: School,
+      category: "configuracion",
+    },
+    {
+      id: "settings",
+      label: "Configuración Avanzada",
+      icon: Settings,
+      category: "configuracion",
     },
   ];
 
@@ -314,18 +402,40 @@ const AdminDashboard = () => {
     }
   };
 
-  // Función para obtener la etiqueta de categoría
+  // Función para obtener la etiqueta de categoría (sin emojis)
   const getCategoryLabel = (category) => {
     const labels = {
       dashboard: "Dashboard",
-      herramientas: "Herramientas IA",
-      finanzas: "Finanzas",
       personas: "Personas",
       academico: "Académico",
-      infraestructura: "Infraestructura",
+      evaluacion: "Evaluación",
+      finanzas: "Finanzas",
       administrativo: "Administrativo",
+      reportes: "Reportes",
+      herramientas: "Herramientas",
+      usuarios: "Usuarios",
+      configuracion: "Configuración",
+      infraestructura: "Infraestructura",
     };
     return labels[category] || category;
+  };
+
+  // Función para obtener el icono de categoría
+  const getCategoryIcon = (category) => {
+    const icons = {
+      dashboard: BarChart3,
+      personas: UsersIcon,
+      academico: GraduationCap,
+      evaluacion: ClipboardList,
+      finanzas: DollarSign,
+      administrativo: FileText,
+      reportes: BarChart3,
+      herramientas: MessageCircle,
+      usuarios: CircleUser,
+      configuracion: Settings,
+      infraestructura: School,
+    };
+    return icons[category] || GraduationCap;
   };
 
   return (
@@ -346,9 +456,10 @@ const AdminDashboard = () => {
       >
         {/* Mobile close button */}
         <div className="flex items-center bg-blue-800 justify-between p-7 border-b border-gray-200 lg:justify-start">
-          <div className="flex items-center space-x-3 ">
-            <Baby className="w-8 h-8 text-white" />
-            <span className="text-xl font-bold text-white">Nido Pro</span>
+          <div className="flex items-center space-x-3 mt-1">
+            <span className="text-xl font-bold text-white tracking-wider">
+              EDA
+            </span>
           </div>
           <button
             className="lg:hidden p-2 text-white hover:text-gray-300"
@@ -376,7 +487,10 @@ const AdminDashboard = () => {
                   {showCategorySeparator && (
                     <div className="my-4 px-4 ">
                       <div className="h-px bg-gray-400"></div>
-                      <div className="text-sm font-bold text-blue-900 uppercase tracking-wider mt-2 mb-1">
+                      <div className="text-sm font-bold text-blue-900 uppercase tracking-wider mt-2 mb-1 flex items-center gap-2">
+                        {React.createElement(getCategoryIcon(item.category), {
+                          className: "w-4 h-4",
+                        })}
                         {getCategoryLabel(item.category)}
                       </div>
                       <div className="h-px bg-gray-400"></div>
