@@ -39,6 +39,8 @@ import Planilla from "./pages/admin/planilla/Planilla";
 import Cronogramas from "./pages/admin/cronogramas/Cronogramas";
 import EvaluacionDocente from "./pages/admin/evaluacion/EvaluacionDocente";
 import AnioEscolar from "./pages/admin/anioescolar/AnioEscolar";
+import Bimestres from "./pages/admin/anioescolar/Bimestres";
+import Acciones from "./pages/admin/anioescolar/Acciones";
 import Seguros from "./pages/admin/seguros/Seguros";
 import AdminAIChat from "./pages/admin/iachat/AIChat";
 import BimestralDocente from "./pages/admin/bimestralDocente/BimestralDocente";
@@ -214,6 +216,8 @@ function App() {
               <Route path="ai-chat" element={<AdminAIChat />} />
               <Route path="usuarios" element={<Usuarios />} />
               <Route path="anio-escolar" element={<AnioEscolar />} />
+              <Route path="bimestres" element={<Bimestres />} />
+              <Route path="acciones-periodo" element={<Acciones />} />
               <Route path="grados" element={<Grados />} />
               <Route path="cursos" element={<Cursos />} />
               <Route path="configuraciones" element={<Configuraciones />} />

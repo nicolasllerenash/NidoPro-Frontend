@@ -24,6 +24,8 @@ import {
   Award,
   MessageCircle,
   Shield,
+  Calendar,
+  Zap,
 } from "lucide-react";
 
 const AdminLayout = () => {
@@ -65,6 +67,18 @@ const AdminLayout = () => {
       path: "/admin/anio-escolar",
       label: "Periodo Escolar",
       icon: Clock,
+      category: "configuracion",
+    },
+    {
+      path: "/admin/bimestres",
+      label: "Bimestres",
+      icon: Calendar,
+      category: "configuracion",
+    },
+    {
+      path: "/admin/acciones-periodo",
+      label: "Acciones Rápidas",
+      icon: Zap,
       category: "configuracion",
     },
     {
