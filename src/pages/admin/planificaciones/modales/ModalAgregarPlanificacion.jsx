@@ -8,7 +8,7 @@ import { FileText, Loader2, Save, X, Upload, File, Eye, Trash2 } from 'lucide-re
 import { toast } from 'sonner';
 import { useAuthStore } from '../../../../store';
 import { planificacionService } from '../../../../services/planificacionService';
-import FirebaseStorageService from '../../../../services/firebaseStorageService';
+import StorageService from '../../../../services/storageService';
 
 const validationSchema = yup.object({
   tipoPlanificacion: yup.string().required('El tipo de planificación es requerido'),
@@ -128,13 +128,13 @@ const ModalAgregarPlanificacion = ({ open, onClose, onSuccess }) => {
       'image/gif'
     ];
 
-    if (!FirebaseStorageService.validateFileType(file, allowedTypes)) {
+    if (!StorageService.validateFileType(file, allowedTypes)) {
       toast.error('Tipo de archivo no permitido. Use PDF, Word, Excel o imágenes.');
       return;
     }
 
     // Validar tamaño (máximo 10MB)
-    if (!FirebaseStorageService.validateFileSize(file, 10)) {
+    if (!StorageService.validateFileSize(file, 10)) {
       toast.error('El archivo es demasiado grande. Máximo 10MB.');
       return;
     }
@@ -143,7 +143,7 @@ const ModalAgregarPlanificacion = ({ open, onClose, onSuccess }) => {
     setValue('archivo', file);
 
     // Crear preview del archivo
-    const fileInfo = FirebaseStorageService.getFileInfo(file);
+    const fileInfo = StorageService.getFileInfo(file);
     setFilePreview(fileInfo);
   };
 
@@ -178,7 +178,7 @@ const ModalAgregarPlanificacion = ({ open, onClose, onSuccess }) => {
       toast.loading('Subiendo archivo a Firebase...', { id: 'upload' });
 
       // Subir archivo a Firebase
-      const uploadResult = await FirebaseStorageService.uploadFile(
+      const uploadResult = await StorageService.uploadFile(
         selectedFile,
         'planificaciones',
         user?.entidadId || 'anonymous'

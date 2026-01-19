@@ -7,7 +7,7 @@ import { tareaService } from '../../../../services/tareaService';
 import { aulaService } from '../../../../services/aulaService';
 import { getIdTrabajadorFromToken } from '../../../../utils/tokenUtils';
 import { useAuthStore } from '../../../../store/useAuthStore';
-import { FirebaseStorageService } from '../../../../services/firebaseStorageService';
+import { StorageService } from '../../../../services/storageService';
 
 const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuthStore();
@@ -160,10 +160,10 @@ const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
     const file = files[0]; // Solo tomar el primer archivo
 
     // Validar archivo
-    const fileInfo = FirebaseStorageService.getFileInfo(file);
+    const fileInfo = StorageService.getFileInfo(file);
 
     // Validar tipo de archivo
-    if (!FirebaseStorageService.validateFileType(file)) {
+    if (!StorageService.validateFileType(file)) {
       toast.error('Tipo de archivo no permitido', {
         description: 'Solo se permiten: PDF, DOC, DOCX, imágenes (JPG, PNG, GIF)'
       });
@@ -172,7 +172,7 @@ const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
     }
 
     // Validar tamaño (máximo 10MB)
-    if (!FirebaseStorageService.validateFileSize(file, 10)) {
+    if (!StorageService.validateFileSize(file, 10)) {
       toast.error('Archivo demasiado grande', {
         description: 'El archivo no puede superar los 10MB'
       });
@@ -204,7 +204,7 @@ const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
         const urlParts = uploadedFileUrl.split('/o/')[1]?.split('?')[0];
         if (urlParts) {
           const filePath = decodeURIComponent(urlParts);
-          FirebaseStorageService.deleteFile(filePath);
+          StorageService.deleteFile(filePath);
           toast.success('Archivo eliminado de la nube');
         }
       } catch (error) {
@@ -284,7 +284,7 @@ const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
           setUploadingFile(true);
           toast.info('Subiendo archivo a la nube...');
 
-          const uploadResult = await FirebaseStorageService.uploadFile(
+          const uploadResult = await StorageService.uploadFile(
             formData.archivo.file,
             'tareas',
             idTrabajador
@@ -339,7 +339,7 @@ const CrearTareaModal = ({ isOpen, onClose, onSave }) => {
           const urlParts = uploadedFileUrl.split('/o/')[1]?.split('?')[0];
           if (urlParts) {
             const filePath = decodeURIComponent(urlParts);
-            await FirebaseStorageService.deleteFile(filePath);
+            await StorageService.deleteFile(filePath);
             console.log('🗑️ [CREAR TAREA] Archivo eliminado por error en creación');
           }
         } catch (cleanupError) {
