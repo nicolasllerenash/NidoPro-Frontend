@@ -10,10 +10,10 @@ import trabajadorService from "src/services/trabajadorService";
 
 // IDs de roles disponibles
 const ROLES = [
-  { id: "72dde73a-2c67-4ea5-bbfa-93ec728a7a9d", nombre: "DOCENTE" },
-  { id: "751ce416-069d-428a-bef4-3069b18d56c7", nombre: "SECRETARIA" },
-  { id: "3bb776ee-5e5a-4539-aaee-d12b5c388773", nombre: "ADMINISTRADOR" },
-  { id: "4879c823-96ec-4120-a264-c7e87d1fb755", nombre: "ESPECIALISTA" },
+  { id: "7c643246-b7ee-4982-aedb-53fc27d19ed2", nombre: "DOCENTE" },
+  { id: "0c69ff5d-6091-4c56-b953-15ff7871f1fa", nombre: "SECRETARIA" },
+  { id: "34221058-9fdd-4187-b9eb-c4ae79e92b35", nombre: "ADMINISTRADOR" },
+  { id: "8c31ef16-3316-4788-a3d4-cf40d053b95f", nombre: "ESPECIALISTA" },
 ];
 
 // Esquema de validación simplificado
