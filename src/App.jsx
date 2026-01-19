@@ -46,6 +46,8 @@ import AdminAIChat from "./pages/admin/iachat/AIChat";
 import BimestralDocente from "./pages/admin/bimestralDocente/BimestralDocente";
 import Roles from "./pages/admin/roles/Roles";
 import AsignacionCursos from "./pages/admin/asignacion-cursos/AsignacionCursos";
+import CursosGrado from "./pages/admin/cursos-grado/CursosGrado";
+import AsignacionDocenteCursoAula from "./pages/admin/asignacion-docente-curso-aula/AsignacionDocenteCursoAula";
 
 // Teacher Pages
 import TeacherOverview from "./pages/dashboards/TeacherOverview";
@@ -220,6 +222,8 @@ function App() {
               <Route path="acciones-periodo" element={<Acciones />} />
               <Route path="grados" element={<Grados />} />
               <Route path="cursos" element={<Cursos />} />
+              <Route path="cursos-grado" element={<CursosGrado />} />
+              <Route path="asignacion-docente-curso-aula" element={<AsignacionDocenteCursoAula />} />
               <Route path="configuraciones" element={<Configuraciones />} />
             </Route>
 

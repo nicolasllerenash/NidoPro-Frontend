@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataTable, matriculaColumns, matriculaFilters } from '../../../../components/common/DataTable';
-import { Eye, Edit, Trash2, GraduationCap } from 'lucide-react';
+import { Eye, Edit, Trash2, GraduationCap, School, DollarSign } from 'lucide-react';
 
 /**
  * Tabla de matrícula usando el componente DataTable unificado
@@ -11,7 +11,9 @@ const TablaMatricula = ({
   onAdd, 
   onEdit, 
   onDelete, 
-  onView
+  onView,
+  onAsignarAula,
+  onRegistrarPago
 }) => {
   // Configurar acciones para cada fila
   const actions = [
@@ -20,6 +22,22 @@ const TablaMatricula = ({
       label: 'Ver detalles',
       onClick: onView,
       className: 'text-blue-600 hover:text-blue-900'
+    },
+    {
+      icon: School,
+      label: 'Asignar aula (Paso 2)',
+      onClick: onAsignarAula,
+      className: 'text-green-600 hover:text-green-900',
+      // Solo mostrar si no tiene aula asignada
+      condition: (matricula) => !matricula.idAula
+    },
+    {
+      icon: DollarSign,
+      label: 'Registrar pago (Paso 3)',
+      onClick: onRegistrarPago,
+      className: 'text-purple-600 hover:text-purple-900',
+      // Solo mostrar si tiene aula pero no tiene registro en caja
+      condition: (matricula) => matricula.idAula && !matricula.pagoRegistrado
     },
     {
       icon: Edit,

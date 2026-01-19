@@ -182,7 +182,7 @@ const AdminOverview = () => {
             to="/admin/ai-chat"
             className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium"
           >
-            Chatear ahora
+            DIsponible pronto...
           </Link>
         </div>
       </div>

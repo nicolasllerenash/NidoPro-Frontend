@@ -15,11 +15,13 @@ import {
 } from "../../../hooks/queries/useAulasQueries";
 import ModalEditarAula from "./modales/ModalEditarAula";
 import ModalAgregarAula from "./modales/ModalAgregarAula";
+import ModalVerEstudiantesAula from "./modales/ModalVerEstudiantesAula";
 
 const Aulas = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalEditarAula, setModalEditarAula] = useState(false);
   const [modalAgregarAula, setModalAgregarAula] = useState(false);
+  const [modalVerEstudiantes, setModalVerEstudiantes] = useState(false);
   const [aulaSeleccionada, setAulaSeleccionada] = useState(null);
 
   // Hook para obtener aulas
@@ -47,6 +49,16 @@ const Aulas = () => {
 
   const handleCloseEditarAula = () => {
     setModalEditarAula(false);
+    setAulaSeleccionada(null);
+  };
+
+  const handleVerEstudiantes = (aula) => {
+    setAulaSeleccionada(aula);
+    setModalVerEstudiantes(true);
+  };
+
+  const handleCloseVerEstudiantes = () => {
+    setModalVerEstudiantes(false);
     setAulaSeleccionada(null);
   };
 
@@ -184,6 +196,13 @@ const Aulas = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
+                          onClick={() => handleVerEstudiantes(aula)}
+                          className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-md transition-colors"
+                          title="Ver estudiantes del aula"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleEditarAula(aula)}
                           className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-md transition-colors"
                           title="Editar capacidad máxima"
@@ -213,6 +232,14 @@ const Aulas = () => {
         <ModalAgregarAula
           isOpen={modalAgregarAula}
           onClose={() => setModalAgregarAula(false)}
+        />
+      )}
+
+      {modalVerEstudiantes && (
+        <ModalVerEstudiantesAula
+          isOpen={modalVerEstudiantes}
+          onClose={handleCloseVerEstudiantes}
+          aula={aulaSeleccionada}
         />
       )}
     </div>

@@ -75,16 +75,22 @@ const AdminLayout = () => {
       icon: Calendar,
       category: "configuracion",
     },
-    {
-      path: "/admin/acciones-periodo",
-      label: "Acciones Rápidas",
-      icon: Zap,
-      category: "configuracion",
-    },
+    // {
+    //   path: "/admin/acciones-periodo",
+    //   label: "Acciones Rápidas",
+    //   icon: Zap,
+    //   category: "configuracion",
+    // },
     {
       path: "/admin/cursos",
       label: "Cursos y Materias",
       icon: BookOpen,
+      category: "configuracion",
+    },
+    {
+      path: "/admin/cursos-grado",
+      label: "Cursos por Grado",
+      icon: GraduationCap,
       category: "configuracion",
     },
 
@@ -134,6 +140,12 @@ const AdminLayout = () => {
       category: "academico",
     },
     {
+      path: "/admin/asignacion-docente-curso-aula",
+      label: "Docente-Curso-Aula",
+      icon: BookOpen,
+      category: "academico",
+    },
+    {
       path: "/admin/planificaciones",
       label: "Planificaciones",
       icon: FileText,
@@ -156,34 +168,6 @@ const AdminLayout = () => {
       label: "Evaluación Bimestral",
       icon: ClipboardList,
       category: "academico",
-    },
-
-    // FINANZAS
-    {
-      path: "/admin/finanzas",
-      label: "Caja y Movimientos",
-      icon: DollarSign,
-      category: "finanzas",
-    },
-
-    // ADMINISTRATIVO
-    {
-      path: "/admin/contratos",
-      label: "Contratos",
-      icon: FileText,
-      category: "administrativo",
-    },
-    {
-      path: "/admin/planilla",
-      label: "Planilla",
-      icon: ClipboardList,
-      category: "administrativo",
-    },
-    {
-      path: "/admin/seguros",
-      label: "Tipos de Seguro",
-      icon: Shield,
-      category: "administrativo",
     },
 
     // REPORTES Y HERRAMIENTAS

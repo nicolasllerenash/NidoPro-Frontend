@@ -390,7 +390,7 @@ const ParentDashboard = () => {
             onClick={() => setActiveSection("iachat")}
             className="bg-white text-yellow-600 hover:bg-yellow-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium"
           >
-            Chatear ahora
+            DIsponible pronto...
           </button>
         </div>
       </div>

@@ -399,11 +399,17 @@ export const aulaService = {
    */
   async getAulasSinAsignacion() {
     try {
-      const response = await api.get('/aula/sin-asignacion');
-      console.log('📋 Aulas sin asignación obtenidas:', response.data);
+      // TEMPORAL: Usar endpoint principal porque /sin-asignacion no devuelve idGrado
+      const response = await api.get('/aula');
+      console.log('📋 Response completa aulas:', response.data);
       
       // Extraer datos del objeto info.data si existe
-      return response.data?.info?.data || response.data?.info || response.data || [];
+      const todasLasAulas = response.data?.info?.data || response.data?.aulas || response.data || [];
+      console.log('✅ Todas las aulas procesadas:', todasLasAulas);
+      
+      // TODO: Filtrar aulas sin asignación en el backend
+      // Por ahora retornamos todas
+      return todasLasAulas;
     } catch (error) {
       console.error('Error al obtener aulas sin asignación:', error);
       throw new Error(error.response?.data?.message || 'Error al obtener aulas sin asignación');

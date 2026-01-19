@@ -247,15 +247,19 @@ export const matriculaService = {
   },
 
   /**
-   * Crear nueva matrícula:
-   * 1. POST /api/v1/matricula (crear matrícula)
-   * El registro en caja simple se hace automáticamente en el backend
+   * PASO 1: Crear nueva matrícula SIN aula
+   * POST /api/v1/matricula → Crea matrícula sin asignar aula
    * @param {Object} matriculaData - Datos de la matrícula
-   * @returns {Promise<Object>} Matrícula creada
+   * @param {string} matriculaData.fechaIngreso - Fecha de ingreso
+   * @param {string} matriculaData.idGrado - UUID del grado
+   * @param {number} matriculaData.costoMatricula - Costo de matrícula
+   * @param {Object} matriculaData.apoderadoData - Datos del apoderado
+   * @param {Object} matriculaData.estudianteData - Datos del estudiante
+   * @returns {Promise<Object>} Matrícula creada (devuelve idMatricula)
    */
   async createMatricula(matriculaData) {
     try {
-      console.log('📤 Creando matrícula:', matriculaData);
+      console.log('📤 Creando matrícula (PASO 1 - SIN AULA):', matriculaData);
 
       // Validar datos antes del envío
       if (!matriculaData.estudianteData) {
@@ -281,13 +285,22 @@ export const matriculaService = {
         }
       });
 
-      console.log('📋 Datos finales a enviar al backend:', JSON.stringify(matriculaData, null, 2));
+      // Preparar payload SIN aula (el nuevo flujo no incluye aula en este paso)
+      const payload = {
+        fechaIngreso: matriculaData.fechaIngreso,
+        idGrado: matriculaData.idGrado,
+        costoMatricula: matriculaData.costoMatricula,
+        apoderadoData: matriculaData.apoderadoData,
+        estudianteData: matriculaData.estudianteData
+      };
 
-      // Crear la matrícula
+      console.log('📋 Datos finales a enviar al backend (PASO 1):', JSON.stringify(payload, null, 2));
+
+      // Crear la matrícula SIN aula
       console.log('🌐 Creando matrícula en:', `${API_BASE_URL}/matricula`);
 
-      const matriculaResponse = await api.post('/matricula', matriculaData);
-      console.log('✅ Matrícula creada exitosamente:', matriculaResponse.data);
+      const matriculaResponse = await api.post('/matricula', payload);
+      console.log('✅ Matrícula creada exitosamente (sin aula):', matriculaResponse.data);
 
       return matriculaResponse.data;
 
@@ -585,6 +598,56 @@ export const matriculaService = {
     } catch (error) {
       console.error('❌ Error al actualizar contactos de matrícula:', error);
       throw new Error(error.response?.data?.message || 'Error al actualizar contactos de matrícula');
+    }
+  },
+
+  /**
+   * ==========================================
+   * NUEVOS ENDPOINTS - FLUJO DE 3 PASOS
+   * ==========================================
+   */
+
+  /**
+   * PASO 2: Asignar aula a una matrícula existente
+   * @param {string} idMatricula - ID de la matrícula
+   * @param {string} idAula - ID del aula a asignar
+   * @returns {Promise<Object>} Matrícula con aula asignada
+   */
+  async asignarAula(idMatricula, idAula) {
+    try {
+      console.log('🏫 Asignando aula a matrícula:', { idMatricula, idAula });
+      
+      const response = await api.post(`/matricula/${idMatricula}/asignar-aula`, {
+        idAula
+      });
+      
+      console.log('✅ Aula asignada exitosamente:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error al asignar aula:', error);
+      throw new Error(error.response?.data?.message || 'Error al asignar aula a la matrícula');
+    }
+  },
+
+  /**
+   * PASO 3: Registrar pago de matrícula en caja
+   * @param {string} idMatricula - ID de la matrícula
+   * @param {Object} pagoData - Datos del pago
+   * @param {string} pagoData.registradoPor - UUID del trabajador que registra
+   * @param {string} pagoData.numeroComprobante - Número de comprobante
+   * @returns {Promise<Object>} Confirmación del registro en caja
+   */
+  async registrarPagoEnCaja(idMatricula, pagoData) {
+    try {
+      console.log('💰 Registrando pago en caja:', { idMatricula, ...pagoData });
+      
+      const response = await api.post(`/matricula/${idMatricula}/registrar-en-caja`, pagoData);
+      
+      console.log('✅ Pago registrado en caja exitosamente:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error al registrar pago en caja:', error);
+      throw new Error(error.response?.data?.message || 'Error al registrar pago en caja');
     }
   }
 };

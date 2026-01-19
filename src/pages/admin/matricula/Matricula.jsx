@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users, GraduationCap, TrendingUp, Calendar } from 'lucide-react';
+import { UserPlus, Users, GraduationCap, TrendingUp, Calendar, School, DollarSign } from 'lucide-react';
 import TablaMatricula from './tablas/TablaMatricula';
 import ModalAgregarMatricula from './modales/ModalAgregarMatricula';
 import ModalVerMatricula from './modales/ModalVerMatricula';
 import ModalEditarMatricula from './modales/ModalEditarMatricula';
 import ModalEliminarMatricula from './modales/ModalEliminarMatricula';
+import ModalAsignarAula from './modales/ModalAsignarAula';
+import ModalRegistrarPago from './modales/ModalRegistrarPago';
 import ModalErrorBoundary from '../../../components/common/ModalErrorBoundary';
 import { useMatricula } from '../../../hooks/useMatricula';
 import { storage } from '../../../utils';
@@ -25,6 +27,8 @@ const Matricula = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAsignarAulaModal, setShowAsignarAulaModal] = useState(false);
+  const [showRegistrarPagoModal, setShowRegistrarPagoModal] = useState(false);
 
   // Handlers para modales
   const handleAdd = () => setShowAddModal(true);
@@ -52,11 +56,27 @@ const Matricula = () => {
     setShowDeleteModal(true);
   };
 
+  // NUEVO: Handler para asignar aula (Paso 2)
+  const handleAsignarAula = (matricula) => {
+    console.log('🏫 Asignando aula a matrícula:', matricula);
+    setSelectedMatricula(matricula);
+    setShowAsignarAulaModal(true);
+  };
+
+  // NUEVO: Handler para registrar pago (Paso 3)
+  const handleRegistrarPago = (matricula) => {
+    console.log('💰 Registrando pago de matrícula:', matricula);
+    setSelectedMatricula(matricula);
+    setShowRegistrarPagoModal(true);
+  };
+
   const handleCloseModals = () => {
     setShowAddModal(false);
     setShowViewModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
+    setShowAsignarAulaModal(false);
+    setShowRegistrarPagoModal(false);
     setSelectedMatricula(null);
   };
 
@@ -114,6 +134,8 @@ const Matricula = () => {
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onAsignarAula={handleAsignarAula}
+        onRegistrarPago={handleRegistrarPago}
       />
 
       {/* Modales */}
@@ -143,6 +165,21 @@ const Matricula = () => {
         onClose={handleCloseModals}
         onDelete={handleDeleteSuccess}
         matricula={selectedMatricula}
+      />
+
+      {/* NUEVOS MODALES - FLUJO DE 3 PASOS */}
+      <ModalAsignarAula
+        isOpen={showAsignarAulaModal}
+        onClose={handleCloseModals}
+        matricula={selectedMatricula}
+        refetch={loadMatriculas}
+      />
+
+      <ModalRegistrarPago
+        isOpen={showRegistrarPagoModal}
+        onClose={handleCloseModals}
+        matricula={selectedMatricula}
+        refetch={loadMatriculas}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import { X, UserPlus, DollarSign, User, Users, School, Baby, Upload, Save, Loader2, Search, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMatricula } from '../../../../hooks/useMatricula';
+import { useAsignarAula } from '../../../../hooks/queries/useMatriculaQueries';
 import { useAulasAsignacion } from '../../../../hooks/useAulasAsignacion';
 import { useApoderados } from '../../../../hooks/useApoderados';
 import { useGrados } from '../../../../hooks/useGrados';
@@ -114,16 +115,6 @@ const schema = yup.object({
   apoderadoDireccion: yup.string()
     .required('La dirección es requerida'),
 
-  // Asignación de Aula
-  tipoAsignacionAula: yup.string()
-    .required('El tipo de asignación es requerido'),
-  idAulaEspecifica: yup.string()
-    .when('tipoAsignacionAula', {
-      is: 'manual',
-      then: (schema) => schema.required('Debe seleccionar un aula específica cuando el tipo de asignación es manual'),
-      otherwise: (schema) => schema.nullable()
-    }),
-  
   // Campos opcionales
   observaciones: yup.string(),
   motivoPreferencia: yup.string()
@@ -131,6 +122,7 @@ const schema = yup.object({
 
 const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
   const { matricularEstudiante, loading, creating } = useMatricula();
+  const asignarAulaMutation = useAsignarAula();
   
   // Usar el hook con manejo de errores
   let aulasHookData;
@@ -172,8 +164,6 @@ const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
       metodoPago: 'Transferencia bancaria',
       estudianteTipoDoc: 'DNI',
       apoderadoTipoDoc: 'DNI',
-      tipoAsignacionAula: 'manual',
-      idAulaEspecifica: '',
       fechaIngreso: new Date().toISOString().split('T')[0],
       contactosEmergencia: [{ nombre: '', apellido: '', telefono: '', email: '', tipoContacto: '', esPrincipal: true, prioridad: 1 }],
       voucherFile: null
@@ -306,65 +296,9 @@ const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
 
   const onSubmit = async (data) => {
     try {
- 
+      console.log('📝 Iniciando creación de matrícula (PASO 1 - SIN AULA)...');
       
-      let voucherUrl = null;
-
-      if (voucherFile) {
-        setUploadingVoucher(true);
-        toast.loading('Subiendo voucher a Firebase...', { id: 'upload' });
-
-        console.log('📤 Iniciando subida de voucher:', {
-          fileName: voucherFile.name,
-          fileSize: voucherFile.size,
-          fileType: voucherFile.type,
-          metodoPago: watch('metodoPago')
-        });
-
-        try {
-          // Subir archivo a Firebase Storage
-          const uploadResult = await FirebaseStorageService.uploadFile(
-            voucherFile,
-            'vouchers-matricula',
-            'matricula-' + Date.now() // Usar como identificador único en lugar de userId
-          );
-
-          voucherUrl = uploadResult.url;
-          console.log('✅ Voucher subido exitosamente:', {
-            url: voucherUrl,
-            path: uploadResult.path,
-            originalName: uploadResult.originalName
-          });
-          
-          toast.dismiss('upload');
-          toast.success('Voucher subido exitosamente');
-        } catch (error) {
-          console.error('❌ Error completo al subir voucher:', error);
-          toast.dismiss('upload');
-          throw new Error(`Error al subir el voucher: ${error.message}`);
-        } finally {
-          setUploadingVoucher(false);
-        }
-      } else {
-                console.log('ℹ️ No hay voucher para subir (método de pago:', watch('metodoPago'), ')');
-      }
-
-      // Validar que el voucher se haya subido si se seleccionó un archivo
-      if (data.voucherFile && !voucherUrl) {
-        toast.error('Error de validación', {
-          description: 'El voucher debe subirse correctamente antes de continuar'
-        });
-        return;
-      }
-
-      // Si no hay voucher pero es requerido por el método de pago, mostrar error
-      if (!data.voucherFile && watch('metodoPago') !== 'Efectivo') {
-        toast.error('Error de validación', {
-          description: 'El voucher es requerido para métodos de pago que no sean efectivo'
-        });
-        return;
-      }
-      
+      // Validar y limpiar contactos de emergencia
       let contactosEmergenciaLimpios = validateAndCleanContactos(data.contactosEmergencia || []);
       contactosEmergenciaLimpios = ensurePrimaryContact(contactosEmergenciaLimpios);
 
@@ -377,55 +311,11 @@ const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
         return;
       }
 
-      // Obtener ID real del aula si es asignación manual
-      let idAulaReal = null;
-      if (data.tipoAsignacionAula === 'manual' && data.idAulaEspecifica) {
-        // El idAula ya viene directamente del endpoint de aulas disponibles por grado
-        idAulaReal = data.idAulaEspecifica;
-        console.log('✅ ID del aula seleccionado:', idAulaReal);
-        console.log('🔍 Tipo de valor idAulaEspecifica:', typeof data.idAulaEspecifica);
-        console.log('🔍 Longitud del valor:', data.idAulaEspecifica.length);
-        console.log('🔍 Es UUID válido?:', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.idAulaEspecifica));
-        console.log('🔍 Estado local selectedAulaId:', selectedAulaId);
-      }
-
       const matriculaData = {
-        // Datos básicos requeridos
+        // Datos básicos requeridos (PASO 1 - SIN AULA)
         costoMatricula: data.costoMatricula.toString(),
         fechaIngreso: data.fechaIngreso,
         idGrado: data.idGrado,
-        metodoPago: watch('metodoPago'),
-        anioEscolar: "2025", // Año escolar actual
-        
-        // Incluir idApoderado e idEstudiante explícitamente como null si no existen
-        // NOTA: El backend debería manejar estos campos opcionales
-        ...(selectedApoderado?.id && { idApoderado: selectedApoderado.id }),
-        // idEstudiante siempre será null para nuevos estudiantes
-        // ...(false && { idEstudiante: null }), // Comentado para evitar enviar null
-        
-        // Obtener ID del usuario actual del localStorage o contexto
-        registradoPor: (() => {
-          try {
-            const token = localStorage.getItem('token');
-            if (token) {
-              // Decodificar el token JWT para obtener el ID del usuario
-              const payload = JSON.parse(atob(token.split('.')[1]));
-              // Usar entidadId en lugar de userId para que coincida con lo que espera el backend
-              const entidadId = payload.entidadId || payload.id || payload.userId || payload.sub || null;
-              console.log('👤 RegistradoPor obtenido del token:', {
-                entidadId,
-                payloadEntidadId: payload.entidadId,
-                payloadId: payload.id,
-                payloadUserId: payload.userId,
-                payloadSub: payload.sub
-              });
-              return entidadId;
-            }
-          } catch (error) {
-            console.warn('No se pudo obtener el ID del usuario del token:', error);
-          }
-          return null;
-        })(),
         
         // Datos del apoderado (para crear nuevo o actualizar)
         apoderadoData: {
@@ -435,51 +325,21 @@ const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
           documentoIdentidad: selectedApoderado ? selectedApoderado.documentoIdentidad : data.apoderadoDocumento,
           numero: selectedApoderado ? selectedApoderado.numero : data.apoderadoTelefono,
           correo: selectedApoderado ? selectedApoderado.correo : data.apoderadoCorreo,
-          direccion: selectedApoderado ? selectedApoderado.direccion : data.apoderadoDireccion,
-          esPrincipal: true,
-          tipoApoderado: "Padre" // Cambiado para coincidir con el Swagger
+          direccion: selectedApoderado ? selectedApoderado.direccion : data.apoderadoDireccion
         },
         
-        // Datos del estudiante (para crear nuevo) - usando UUID real del rol ESTUDIANTE
+        // Datos del estudiante (para crear nuevo)
         estudianteData: {
           nombre: data.estudianteNombre?.trim() || '',
           apellido: data.estudianteApellido?.trim() || '',
           tipoDocumento: data.estudianteTipoDoc || 'DNI',
           nroDocumento: data.estudianteDocumento?.trim() || '',
           contactosEmergencia: contactosEmergenciaLimpios,
-          observaciones: data.observaciones?.trim() || '',
-          idRol: "35225955-5aeb-4df0-8014-1cdfbce9b41e", // UUID real del rol ESTUDIANTE
-          imagen_estudiante: null
-        },
-        
-        // Asignación de aula
-        tipoAsignacionAula: data.tipoAsignacionAula,
-        idAulaEspecifica: idAulaReal,
-        
-        // Motivo de preferencia
-        motivoPreferencia: data.motivoPreferencia || null,
-        
-        // Voucher
-        voucherImg: voucherUrl || ""
+          observaciones: data.observaciones?.trim() || ''
+        }
       };
 
-      console.log('📋 Datos COMPLETOS preparados para backend:', JSON.stringify(matriculaData, null, 2));
-      console.log('🎫 Información específica del voucher:', {
-        voucherFile: !!voucherFile,
-        voucherUrl: voucherUrl,
-        metodoPago: matriculaData.metodoPago,
-        voucherImg: matriculaData.voucherImg
-      });
-      
-      // Validar datos completos antes del envío
-      const validation = validateMatriculaData(matriculaData);
-      if (!validation.isValid) {
-        console.error('❌ Errores de validación:', validation.errors);
-        toast.error('Error de validación', {
-          description: validation.errors[0] // Mostrar el primer error
-        });
-        return;
-      }
+      console.log('📋 Datos preparados para backend (PASO 1):', JSON.stringify(matriculaData, null, 2));
       
       // Debug específico para contactos de emergencia
       console.log('🚨 VERIFICACIÓN CONTACTOS DE EMERGENCIA:');
@@ -517,11 +377,50 @@ const ModalAgregarMatricula = ({ isOpen, onClose, refetch }) => {
       console.log('🧹 Datos limpiados para envío:', cleanMatriculaData);
       console.log('🧹 Contactos después de limpiar:', cleanMatriculaData.estudianteData?.contactosEmergencia);
 
-      await matricularEstudiante(cleanMatriculaData);
+      // PASO 1: Crear matrícula
+      const resultadoMatricula = await matricularEstudiante(cleanMatriculaData);
+      console.log('✅ Resultado PASO 1:', resultadoMatricula);
 
-      toast.success('Matrícula registrada exitosamente', {
-        description: 'La matrícula ha sido creada y registrada en el sistema financiero'
-      });
+      // Obtener el ID de la matrícula creada
+      const idMatricula = resultadoMatricula?.info?.data?.idMatricula || resultadoMatricula?.data?.idMatricula || resultadoMatricula?.idMatricula;
+      
+      if (!idMatricula) {
+        console.warn('⚠️ No se pudo obtener el ID de la matrícula creada');
+        toast.success('✅ Matrícula creada exitosamente (Paso 1/3)', {
+          description: 'Ahora puede asignar un aula manualmente'
+        });
+      } else {
+        // PASO 2: Asignar aula si se seleccionó una
+        const idAulaSeleccionada = data.idAulaEspecifica || watch('idAulaEspecifica');
+        
+        if (idAulaSeleccionada) {
+          try {
+            console.log('🏫 Asignando aula automáticamente (PASO 2)...', {
+              idMatricula,
+              idAula: idAulaSeleccionada
+            });
+            
+            await asignarAulaMutation.mutateAsync({
+              idMatricula,
+              idAula: idAulaSeleccionada
+            });
+            
+            toast.success('✅ Matrícula completa (Pasos 1 y 2)', {
+              description: 'Estudiante matriculado y aula asignada correctamente'
+            });
+          } catch (errorAula) {
+            console.error('❌ Error al asignar aula (PASO 2):', errorAula);
+            toast.warning('Matrícula creada, pero no se pudo asignar el aula', {
+              description: 'Por favor, asigne el aula manualmente desde la tabla'
+            });
+          }
+        } else {
+          toast.success('✅ Matrícula creada exitosamente (Paso 1/3)', {
+            description: 'Ahora puede asignar un aula desde la tabla'
+          });
+        }
+      }
+      
       handleClose();
       if (refetch) refetch();
     } catch (error) {

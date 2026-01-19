@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, School, User, Calendar, Users } from 'lucide-react';
 import { DataTable } from '../../../../components/common/DataTable';
-import ModalAgregarAula from '../modales/ModalAgregarAula';
+import ModalAsignarDocente from '../modales/ModalAsignarDocente';
 import ModalVerAula from '../modales/ModalVerAula';
 import ModalEditarAula from '../modales/ModalEditarAula';
 import ModalEliminarAula from '../modales/ModalEliminarAula';
@@ -204,23 +204,22 @@ const TablaAulas = ({
         title="Gestión de Asignaciones de Aula"
         icon={School}
         searchPlaceholder="Buscar por aula, docente o sección..."
-        // onAdd={handleAddAula}
-        // onEdit={handleEditAula}
-        // onDelete={handleDeleteAula}
-        // onView={handleViewAula}
-        // onImport={handleImportAulas}
+        onAdd={handleAddAula}
+        onEdit={handleEditAula}
+        onDelete={handleDeleteAula}
+        onView={handleViewAula}
         onExport={handleExportAulas}
         onRefresh={onRefresh}
         actions={{
-          add: false, // Las asignaciones se crean desde trabajadores
-          edit: false,
-          delete: false,
-          view: false,
+          add: true, // Habilitar botón para crear asignaciones
+          edit: true,
+          delete: true,
+          view: true,
           import: false,
-          export: false,
+          export: true,
           refresh: true
         }}
-        addButtonText="Nueva Asignación"
+        addButtonText="Asignar Docente"
         loadingMessage="Cargando asignaciones..."
         emptyMessage="No hay asignaciones de aula registradas"
         itemsPerPage={10}
@@ -230,7 +229,7 @@ const TablaAulas = ({
       />
 
       {/* Modales de Asignaciones */}
-      <ModalAgregarAula
+      <ModalAsignarDocente
         isOpen={showAulaModal}
         onClose={() => setShowAulaModal(false)}
       />

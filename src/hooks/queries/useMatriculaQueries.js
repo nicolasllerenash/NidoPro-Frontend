@@ -252,3 +252,58 @@ export const useExportMatriculas = () => {
     }
   });
 };
+
+// ==========================================
+// NUEVOS HOOKS - FLUJO DE 3 PASOS
+// ==========================================
+
+/**
+ * Hook para asignar aula a una matrícula (PASO 2)
+ */
+export const useAsignarAula = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ idMatricula, idAula }) => matriculaService.asignarAula(idMatricula, idAula),
+    onSuccess: (updatedMatricula, { idMatricula }) => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: matriculaKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: matriculaKeys.detail(idMatricula) });
+      
+      toast.success('¡Aula asignada exitosamente!', {
+        description: 'El estudiante ha sido asignado al aula seleccionada'
+      });
+    },
+    onError: (error) => {
+      toast.error('Error al asignar aula', {
+        description: error.message || 'Ocurrió un error al asignar el aula'
+      });
+    }
+  });
+};
+
+/**
+ * Hook para registrar pago en caja (PASO 3)
+ */
+export const useRegistrarPago = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ idMatricula, registradoPor, numeroComprobante }) => 
+      matriculaService.registrarPagoEnCaja(idMatricula, { registradoPor, numeroComprobante }),
+    onSuccess: (result, { idMatricula }) => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: matriculaKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: matriculaKeys.detail(idMatricula) });
+      
+      toast.success('¡Pago registrado exitosamente!', {
+        description: 'El pago de matrícula ha sido registrado en caja'
+      });
+    },
+    onError: (error) => {
+      toast.error('Error al registrar pago', {
+        description: error.message || 'Ocurrió un error al registrar el pago'
+      });
+    }
+  });
+};
