@@ -401,16 +401,16 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField label="Aula" required error={errors.idAulas?.message}>
                         <select
-                          {...register('idAulas')}
+                          name="idAulas"
                           className={inputClassName(errors.idAulas)}
                           disabled={isLoading || loadingAulas}
                           onChange={(e) => {
                             // Convertir el valor único en un array
                             const value = e.target.value;
                             if (value) {
-                              setValue('idAulas', [value]);
+                              setValue('idAulas', [value], { shouldValidate: true });
                             } else {
-                              setValue('idAulas', []);
+                              setValue('idAulas', [], { shouldValidate: true });
                             }
                           }}
                         >
