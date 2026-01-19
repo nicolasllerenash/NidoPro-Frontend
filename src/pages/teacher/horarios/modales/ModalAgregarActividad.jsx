@@ -28,7 +28,7 @@ const validationSchema = yup.object({
   fechaFin: yup.string().required('La fecha de fin es requerida'),
   horaInicio: yup.string().required('La hora de inicio es requerida'),
   horaFin: yup.string().required('La hora de fin es requerida'),
-  idAula: yup.string().required('El ID del aula es requerido').trim(),
+  idAulas: yup.array().of(yup.string()).min(1, 'Debe seleccionar al menos un aula').required('El aula es requerida'),
   idTrabajador: yup.string().required('El ID del trabajador es requerido').trim()
 });
 
@@ -142,7 +142,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
       fechaFin: '',
       horaInicio: '08:00',
       horaFin: '09:00',
-      idAula: '',
+      idAulas: [],
       idTrabajador: user?.entidadId || ''
     }
   });
@@ -191,7 +191,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
         end: new Date(`${activityData.fechaFin}T${watch('horaFin')}:00`),
         resource: {
           descripcion: activityData.descripcion,
-          idAula: activityData.idAula?.idAula,
+          idAulas: activityData.idAula?.idAula ? [activityData.idAula.idAula] : [],
           idTrabajador: activityData.idTrabajador?.idTrabajador,
           nombreActividad: activityData.nombreActividad
         }
@@ -249,7 +249,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
         descripcion: data.descripcion,
         fechaInicio: data.fechaInicio,
         fechaFin: data.fechaFin,
-        idAula: data.idAula,
+        idAulas: Array.isArray(data.idAulas) ? data.idAulas : [data.idAulas],
         idTrabajador: data.idTrabajador
       };
 
@@ -271,7 +271,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
       fechaFin: '',
       horaInicio: '08:00',
       horaFin: '09:00',
-      idAula: '',
+      idAulas: [],
       idTrabajador: user?.entidadId || ''
     });
     onClose();
@@ -399,11 +399,20 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
                   {/* Asignación */}
                   <FormSection title="Asignación" icon={User} iconColor="text-purple-600">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField label="Aula" required error={errors.idAula?.message}>
+                      <FormField label="Aula" required error={errors.idAulas?.message}>
                         <select
-                          {...register('idAula')}
-                          className={inputClassName(errors.idAula)}
+                          {...register('idAulas')}
+                          className={inputClassName(errors.idAulas)}
                           disabled={isLoading || loadingAulas}
+                          onChange={(e) => {
+                            // Convertir el valor único en un array
+                            const value = e.target.value;
+                            if (value) {
+                              setValue('idAulas', [value]);
+                            } else {
+                              setValue('idAulas', []);
+                            }
+                          }}
                         >
                           <option value="">
                             {loadingAulas ? 'Cargando aulas...' : 
