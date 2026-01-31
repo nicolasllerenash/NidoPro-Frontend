@@ -1,10 +1,15 @@
-import React from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
-import { useDeleteCursoGrado } from '../../../../hooks/queries/useCursoGradoQueries';
+import React from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+import { X, AlertTriangle } from "lucide-react";
+import { useDeleteCursoGrado } from "../../../../hooks/queries/useCursoGradoQueries";
 
-const ModalEliminarCursoGrado = ({ isOpen, onClose, cursoGrado, onSuccess }) => {
+const ModalEliminarCursoGrado = ({
+  isOpen,
+  onClose,
+  cursoGrado,
+  onSuccess,
+}) => {
   const deleteMutation = useDeleteCursoGrado();
 
   const handleDelete = async () => {
@@ -13,14 +18,16 @@ const ModalEliminarCursoGrado = ({ isOpen, onClose, cursoGrado, onSuccess }) => 
       await deleteMutation.mutateAsync(id);
       onSuccess();
     } catch (error) {
-      console.error('Error al eliminar curso-grado:', error);
+      console.error("Error al eliminar curso-grado:", error);
     }
   };
 
   if (!cursoGrado) return null;
 
-  const gradoNombre = cursoGrado.grado?.grado || cursoGrado.grado?.nombreGrado || 'Sin grado';
-  const cursoNombre = cursoGrado.curso?.nombreCurso || cursoGrado.curso?.nombre || 'Sin curso';
+  const gradoNombre =
+    cursoGrado.grado?.grado || cursoGrado.grado?.nombreGrado || "Sin grado";
+  const cursoNombre =
+    cursoGrado.curso?.nombreCurso || cursoGrado.curso?.nombre || "Sin curso";
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -34,7 +41,7 @@ const ModalEliminarCursoGrado = ({ isOpen, onClose, cursoGrado, onSuccess }) => 
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-md bg-opacity-25" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -76,10 +83,12 @@ const ModalEliminarCursoGrado = ({ isOpen, onClose, cursoGrado, onSuccess }) => 
                     </p>
                     <div className="bg-gray-50 rounded-lg p-4 text-left">
                       <p className="text-sm text-gray-600">
-                        <span className="font-semibold">Grado:</span> {gradoNombre}
+                        <span className="font-semibold">Grado:</span>{" "}
+                        {gradoNombre}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-semibold">Curso:</span> {cursoNombre}
+                        <span className="font-semibold">Curso:</span>{" "}
+                        {cursoNombre}
                       </p>
                     </div>
                     <p className="text-sm text-red-600 mt-3">
@@ -103,7 +112,7 @@ const ModalEliminarCursoGrado = ({ isOpen, onClose, cursoGrado, onSuccess }) => 
                       disabled={deleteMutation.isPending}
                       className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                      {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
                     </button>
                   </div>
                 </div>

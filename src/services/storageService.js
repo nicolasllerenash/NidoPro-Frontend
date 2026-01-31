@@ -1,7 +1,7 @@
 // src/services/storageService.js
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
 const STORAGE_URL = `${API_BASE_URL}/storage`;
 
 const api = axios.create({
@@ -44,15 +44,15 @@ export class StorageService {
   /**
    * Sube un archivo a Google Cloud Storage
    * @param {File} file - El archivo a subir
-   * @param {string} folder - La carpeta donde se guardará el archivo (ej: 'tareas', 'planificaciones')
+   * @param {string} folder - La carpeta donde se guardará el archivo (ej: 'tareas', 'vouchers', 'planificaciones', 'estudiantes', 'trabajadores', 'informes')
    * @param {string} userId - ID del usuario para organizar los archivos (opcional)
-   * @returns {Promise<Object>} - Información del archivo subido
+   * @returns {Promise<Object>} - Información del archivo subido (url, fileName, mimeType, size, folder)
    */
-  static async uploadFile(file, folder = 'uploads', userId = 'anonymous') {
+  static async uploadFile(file, folder = 'general', userId = 'anonymous') {
     try {
       // Si userId es null, undefined o vacío, usar 'anonymous'
       const safeUserId = userId && userId.trim() ? userId : 'anonymous';
-      
+
       console.log('📤 Iniciando subida a Google Cloud Storage:', {
         originalName: file.name,
         folder: folder,
@@ -82,13 +82,12 @@ export class StorageService {
       const fileData = response.data?.data || response.data;
 
       return {
-        url: fileData.url || fileData.publicUrl,
-        path: fileData.path || fileData.filePath,
-        originalName: file.name,
-        fileName: fileData.fileName || fileData.name,
-        size: file.size,
-        type: file.type,
-        bucket: fileData.bucket
+        url: fileData.url,
+        fileName: fileData.fileName,
+        mimeType: fileData.mimeType || file.type,
+        size: fileData.size || file.size,
+        folder: fileData.folder || folder,
+        originalName: file.name
       };
 
     } catch (error) {
@@ -99,20 +98,26 @@ export class StorageService {
 
   /**
    * Sube múltiples archivos a Google Cloud Storage
-   * @param {FileList|Array} files - Los archivos a subir
+   * @param {FileList|Array} files - Los archivos a subir (máximo 10)
    * @param {string} folder - La carpeta donde se guardarán los archivos
-   * @param {string} userId - ID del usuario
-   * @returns {Promise<Array>} - Array con la información de los archivos subidos
+   * @param {string} userId - ID del usuario (opcional)
+   * @returns {Promise<Object>} - Objeto con urls, count y files
    */
-  static async uploadMultipleFiles(files, folder = 'uploads', userId = 'anonymous') {
+  static async uploadMultipleFiles(files, folder = 'general', userId = 'anonymous') {
     try {
+      const filesArray = Array.from(files);
+
+      if (filesArray.length > 10) {
+        throw new Error('Máximo 10 archivos permitidos por subida');
+      }
+
       const safeUserId = userId && userId.trim() ? userId : 'anonymous';
 
-      console.log(`📤 Subiendo ${files.length} archivos a Google Cloud Storage...`);
+      console.log(`📤 Subiendo ${filesArray.length} archivos a Google Cloud Storage...`);
 
       // Crear FormData con múltiples archivos
       const formData = new FormData();
-      Array.from(files).forEach(file => {
+      filesArray.forEach(file => {
         formData.append('files', file);
       });
       formData.append('folder', folder);
@@ -126,19 +131,22 @@ export class StorageService {
         },
       });
 
-      console.log(`✅ ${files.length} archivos subidos exitosamente`);
+      console.log(`✅ ${filesArray.length} archivos subidos exitosamente`);
 
-      const filesData = response.data?.data || response.data;
+      const responseData = response.data?.data || response.data;
 
-      return filesData.map((fileData, index) => ({
-        url: fileData.url || fileData.publicUrl,
-        path: fileData.path || fileData.filePath,
-        originalName: files[index].name,
-        fileName: fileData.fileName || fileData.name,
-        size: files[index].size,
-        type: files[index].type,
-        bucket: fileData.bucket
-      }));
+      // Mapear la respuesta al formato esperado
+      return {
+        urls: responseData.urls || [],
+        count: responseData.count || filesArray.length,
+        files: (responseData.files || []).map((fileData, index) => ({
+          url: fileData.url,
+          fileName: fileData.fileName,
+          mimeType: fileData.mimeType,
+          size: fileData.size,
+          originalName: filesArray[index]?.name
+        }))
+      };
 
     } catch (error) {
       console.error('❌ Error al subir múltiples archivos:', error);
@@ -148,18 +156,23 @@ export class StorageService {
 
   /**
    * Elimina un archivo de Google Cloud Storage
-   * @param {string} filePath - La ruta del archivo a eliminar
-   * @returns {Promise<void>}
+   * @param {string} fileUrl - La URL pública del archivo a eliminar
+   * @returns {Promise<Object>}
    */
-  static async deleteFile(filePath) {
+  static async deleteFile(fileUrl) {
     try {
-      console.log('🗑️ Eliminando archivo:', filePath);
+      console.log('🗑️ Eliminando archivo:', fileUrl);
 
-      await api.delete('/delete', {
-        data: { filePath }
+      const response = await api.delete('/delete', {
+        data: { fileUrl },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       console.log('✅ Archivo eliminado exitosamente');
+
+      return response.data;
 
     } catch (error) {
       console.error('❌ Error al eliminar archivo:', error);
@@ -169,23 +182,27 @@ export class StorageService {
 
   /**
    * Obtiene una URL firmada temporal para acceder al archivo
-   * @param {string} filePath - La ruta del archivo
-   * @param {number} expiresIn - Tiempo de expiración en minutos (default: 60)
-   * @returns {Promise<string>} - URL firmada
+   * @param {string} fileUrl - La URL pública del archivo
+   * @param {number} expiresInMinutes - Tiempo de expiración en minutos (default: 60)
+   * @returns {Promise<Object>} - Objeto con signedUrl, expiresInMinutes y originalUrl
    */
-  static async getSignedUrl(filePath, expiresIn = 60) {
+  static async getSignedUrl(fileUrl, expiresInMinutes = 60) {
     try {
-      console.log('🔐 Obteniendo URL firmada para:', filePath);
+      console.log('🔐 Obteniendo URL firmada para:', fileUrl);
 
       const response = await api.get('/signed-url', {
-        params: { filePath, expiresIn }
+        params: { fileUrl, expiresInMinutes }
       });
 
-      const signedUrl = response.data?.data?.signedUrl || response.data?.signedUrl;
+      const data = response.data?.data || response.data;
 
       console.log('✅ URL firmada generada exitosamente');
 
-      return signedUrl;
+      return {
+        signedUrl: data.signedUrl,
+        expiresInMinutes: data.expiresInMinutes,
+        originalUrl: data.originalUrl
+      };
 
     } catch (error) {
       console.error('❌ Error al obtener URL firmada:', error);
@@ -195,27 +212,32 @@ export class StorageService {
 
   /**
    * Verifica si un archivo existe
-   * @param {string} filePath - La ruta del archivo
-   * @returns {Promise<boolean>}
+   * @param {string} fileUrl - La URL pública del archivo
+   * @returns {Promise<Object>} - Objeto con exists y fileUrl
    */
-  static async fileExists(filePath) {
+  static async fileExists(fileUrl) {
     try {
       const response = await api.get('/exists', {
-        params: { filePath }
+        params: { fileUrl }
       });
 
-      return response.data?.data?.exists || response.data?.exists || false;
+      const data = response.data?.data || response.data;
+
+      return {
+        exists: data.exists || false,
+        fileUrl: data.fileUrl
+      };
 
     } catch (error) {
       console.error('❌ Error al verificar existencia del archivo:', error);
-      return false;
+      return { exists: false, fileUrl };
     }
   }
 
   /**
-   * Lista archivos en una carpeta
-   * @param {string} folder - Nombre de la carpeta
-   * @returns {Promise<Array>}
+   * Lista archivos en una carpeta específica
+   * @param {string} folder - Nombre de la carpeta (ej: 'tareas', 'planificaciones')
+   * @returns {Promise<Object>} - Objeto con folder, count y files (array de URLs)
    */
   static async listFiles(folder) {
     try {
@@ -223,11 +245,40 @@ export class StorageService {
 
       const response = await api.get(`/list/${folder}`);
 
-      const files = response.data?.data?.files || response.data?.files || [];
+      const data = response.data?.data || response.data;
 
-      console.log(`✅ ${files.length} archivos encontrados`);
+      console.log(`✅ ${data.count || data.files?.length || 0} archivos encontrados`);
 
-      return files;
+      return {
+        folder: data.folder || folder,
+        count: data.count || data.files?.length || 0,
+        files: data.files || []
+      };
+
+    } catch (error) {
+      console.error('❌ Error al listar archivos:', error);
+      throw new Error(error.response?.data?.message || `Error al listar archivos: ${error.message}`);
+    }
+  }
+
+  /**
+   * Lista todos los archivos de todas las carpetas
+   * @returns {Promise<Object>} - Objeto con count y files (array de URLs)
+   */
+  static async listAllFiles() {
+    try {
+      console.log('📂 Listando todos los archivos...');
+
+      const response = await api.get('/list');
+
+      const data = response.data?.data || response.data;
+
+      console.log(`✅ ${data.count || data.files?.length || 0} archivos encontrados`);
+
+      return {
+        count: data.count || data.files?.length || 0,
+        files: data.files || []
+      };
 
     } catch (error) {
       console.error('❌ Error al listar archivos:', error);

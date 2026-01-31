@@ -23,7 +23,7 @@ const VerEstudiantesEvaluadosModal = ({ isOpen, onClose, idAula, evaluacion }) =
         return;
       }
 
-      const response = await fetch(`https://nidopro.up.railway.app/api/v1/nota/libreta-kinder/aula/${idAula}`, {
+      const response = await fetch(`http://localhost:3002/api/v1/nota/libreta-kinder/aula/${idAula}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

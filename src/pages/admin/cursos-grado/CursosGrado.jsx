@@ -1,144 +1,75 @@
-import React, { useState } from 'react';
-import { BookOpen, GraduationCap, Plus } from 'lucide-react';
-import { useCursosGrado } from '../../../hooks/queries/useCursoGradoQueries';
-import TablaCursosGrado from './tablas/TablaCursosGrado';
-import ModalAgregarCursoGrado from './modales/ModalAgregarCursoGrado';
-import ModalEditarCursoGrado from './modales/ModalEditarCursoGrado';
-import ModalEliminarCursoGrado from './modales/ModalEliminarCursoGrado';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import PageHeader from '../../../components/common/PageHeader';
+import { useGrados } from '../../../hooks/useGrados';
 
 const CursosGrado = () => {
-  // Hook para obtener las asignaciones de curso-grado
-  const {
-    data: cursosGradoData,
-    isLoading: loading,
-    error,
-    refetch: refreshCursosGrado
-  } = useCursosGrado();
-
-  // Extraer el array de asignaciones
-  const cursosGrado = Array.isArray(cursosGradoData) ? cursosGradoData :
-                      cursosGradoData?.cursosGrado ? cursosGradoData.cursosGrado :
-                      cursosGradoData?.data ? cursosGradoData.data : [];
-
-  // Calcular estadísticas
-  const statistics = {
-    total: cursosGrado.length,
-    active: cursosGrado.filter(cg => cg.estaActivo).length
-  };
-
-  // Estados para modales
-  const [showModal, setShowModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCursoGrado, setSelectedCursoGrado] = useState(null);
-
-  // Handlers
-  const handleAdd = () => {
-    setShowModal(true);
-  };
-
-  const handleEdit = (cursoGrado) => {
-    setSelectedCursoGrado(cursoGrado);
-    setShowEditModal(true);
-  };
-
-  const handleDelete = (cursoGrado) => {
-    setSelectedCursoGrado(cursoGrado);
-    setShowDeleteModal(true);
-  };
+  const navigate = useNavigate();
+  const { grados = [], isLoading, isError } = useGrados();
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-3 bg-indigo-100 rounded-lg">
-              <BookOpen className="w-8 h-8 text-indigo-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Cursos por Grado</h1>
-              <p className="text-gray-600">Administra qué cursos se imparten en cada grado académico</p>
-            </div>
+      <PageHeader title="Cursos por Grado" />
+
+      {isLoading ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12">
+          <div className="flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-500">Cargando grados...</p>
           </div>
         </div>
-      </div>
-
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <BookOpen className="w-8 h-8 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Asignaciones</p>
-              <p className="text-2xl font-bold text-gray-900">{statistics.total}</p>
-            </div>
-          </div>
+      ) : isError ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <p className="text-red-500 text-lg">Error al cargar los grados</p>
         </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <GraduationCap className="w-8 h-8 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Asignaciones Activas</p>
-              <p className="text-2xl font-bold text-gray-900">{statistics.active}</p>
-            </div>
-          </div>
+      ) : grados.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <p className="text-gray-500 text-lg">No hay grados registrados</p>
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {grados.map((grado) => {
+            const id = grado.idGrado || grado.id;
+            const nombre = grado.grado || grado.nombre;
+            const pension = grado.idPension?.monto;
 
-      {/* Tabla */}
-      <TablaCursosGrado
-        cursosGrado={cursosGrado}
-        loading={loading}
-        onAdd={handleAdd}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      {/* Modales */}
-      <ModalAgregarCursoGrado
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSuccess={() => {
-          setShowModal(false);
-          refreshCursosGrado();
-        }}
-      />
-
-      <ModalEditarCursoGrado
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setSelectedCursoGrado(null);
-        }}
-        cursoGrado={selectedCursoGrado}
-        onSuccess={() => {
-          setShowEditModal(false);
-          setSelectedCursoGrado(null);
-          refreshCursosGrado();
-        }}
-      />
-
-      <ModalEliminarCursoGrado
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSelectedCursoGrado(null);
-        }}
-        onSuccess={() => {
-          setShowDeleteModal(false);
-          setSelectedCursoGrado(null);
-          refreshCursosGrado();
-        }}
-        cursoGrado={selectedCursoGrado}
-      />
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => navigate(`/admin/cursos-grado/${id}`)}
+                className="text-left bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{nombre}</h3>
+                    {grado.descripcion && (
+                      <p className="text-sm text-gray-500 mt-1">{grado.descripcion}</p>
+                    )}
+                  </div>
+                  {grado.estaActivo && (
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      Activo
+                    </span>
+                  )}
+                </div>
+                {pension && (
+                  <p className="text-sm text-gray-600 mt-4">
+                    Pensión: <span className="font-semibold text-gray-900">S/ {pension}</span>
+                  </p>
+                )}
+                <div className="mt-4">
+                  <span className="text-sm font-medium text-blue-600">Ver cursos</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
 
 export default CursosGrado;
+

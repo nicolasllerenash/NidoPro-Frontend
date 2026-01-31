@@ -4,7 +4,7 @@ import { FirebaseStorageService } from "./firebaseStorageService";
 
 // Base URL del API
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://nidopro.up.railway.app/api/v1";
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api/v1";
 
 // Configuración de axios
 const api = axios.create({
@@ -886,6 +886,22 @@ export const trabajadorService = {
         error.response?.data?.message ||
           "Error al cambiar estado del trabajador"
       );
+    }
+  },
+
+  async getDocentes() {
+    try {
+      const response = await api.get('/trabajador/docentes');
+      if (response.data?.info?.data && Array.isArray(response.data.info.data)) {
+        return response.data.info.data;
+      }
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error al obtener docentes:', error);
+      throw new Error(error.response?.data?.message || 'Error al obtener docentes');
     }
   },
 };

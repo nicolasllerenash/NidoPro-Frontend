@@ -152,7 +152,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
     mutationFn: async (activityData) => {
       console.log('🚀 Enviando petición con datos:', activityData);
       
-      const response = await fetch('https://nidopro.up.railway.app/api/v1/cronograma', {
+      const response = await fetch('http://localhost:3002/api/v1/cronograma', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

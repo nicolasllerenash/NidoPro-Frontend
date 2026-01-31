@@ -106,9 +106,10 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
     setError(null);
     try {
       console.log('🔍 Cargando entregas para tarea:', tarea.idTarea);
-      
-      // Usar las entregas que ya vienen en la tarea (tareaEntregas)
-      const entregasData = tarea.tareaEntregas || tarea.entregas || [];
+
+      // Usar las entregas que ya vienen transformadas en la tarea
+      // El hook useTareasTrabajador ya transforma tareaEntregas a entregas
+      const entregasData = tarea.entregas || tarea.tareaEntregas || [];
       console.log('📋 Entregas obtenidas de la tarea:', entregasData);
 
       // Si no hay entregas en la tarea, intentar obtenerlas del servicio
@@ -117,10 +118,10 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
         try {
           const response = await tareaService.obtenerEntregasPorTarea(tarea.idTarea);
           console.log('📋 Respuesta completa del servicio:', response);
-          
+
           // Manejar diferentes formatos de respuesta
           let entregasServicio = [];
-          
+
           if (Array.isArray(response)) {
             entregasServicio = response;
           } else if (response?.data && Array.isArray(response.data)) {
@@ -135,23 +136,41 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
             console.warn('⚠️ Formato de respuesta no reconocido:', response);
             entregasServicio = [];
           }
-          
+
           console.log('📋 Entregas obtenidas del servicio (procesadas):', entregasServicio);
-          
+
           // Verificar que sea un array antes de filtrar
           if (!Array.isArray(entregasServicio)) {
             console.error('❌ Las entregas no son un array:', entregasServicio);
             throw new Error('El formato de las entregas no es válido');
           }
-          
-          // Filtrar entregas - considerar tanto realizoTarea como estado
-          const realizadas = entregasServicio.filter(entrega => 
+
+          // Transformar entregas del servicio al formato esperado
+          const entregasTransformadas = entregasServicio.map(entrega => ({
+            idTareaEntrega: entrega.idTareaEntrega,
+            idEstudiante: entrega.idEstudiante,
+            fechaEntrega: entrega.fechaEntrega,
+            archivoUrl: entrega.archivoUrl,
+            estado: entrega.estado,
+            realizoTarea: entrega.realizoTarea,
+            observaciones: entrega.observaciones,
+            estudiante: {
+              idEstudiante: entrega.idEstudiante2?.idEstudiante || entrega.idEstudiante,
+              nombre: entrega.idEstudiante2?.nombre || entrega.estudiante?.nombre,
+              apellido: entrega.idEstudiante2?.apellido || entrega.estudiante?.apellido,
+              nroDocumento: entrega.idEstudiante2?.nroDocumento || entrega.estudiante?.nroDocumento,
+              imagen: entrega.idEstudiante2?.imagen_estudiante || entrega.estudiante?.imagen
+            }
+          }));
+
+          // Filtrar entregas
+          const realizadas = entregasTransformadas.filter(entrega =>
             entrega.realizoTarea === true || entrega.estado === 'entregado'
           );
-          const pendientes = entregasServicio.filter(entrega => 
+          const pendientes = entregasTransformadas.filter(entrega =>
             entrega.realizoTarea === false && entrega.estado !== 'entregado'
           );
-          
+
           setEntregasRealizadas(realizadas);
           setEntregasPendientes(pendientes);
         } catch (serviceError) {
@@ -161,15 +180,14 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
           setEntregasPendientes([]);
         }
       } else {
-        // Usar las entregas que ya vienen en la tarea
-        // Filtrar entregas - considerar tanto realizoTarea como estado
-        const realizadas = entregasData.filter(entrega => 
+        // Usar las entregas que ya vienen transformadas en la tarea
+        const realizadas = entregasData.filter(entrega =>
           entrega.realizoTarea === true || entrega.estado === 'entregado'
         );
-        const pendientes = entregasData.filter(entrega => 
+        const pendientes = entregasData.filter(entrega =>
           entrega.realizoTarea === false && entrega.estado !== 'entregado'
         );
-        
+
         setEntregasRealizadas(realizadas);
         setEntregasPendientes(pendientes);
       }
@@ -249,11 +267,11 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
                       <div className="flex flex-wrap items-center gap-4 text-green-100">
                         <div className="flex items-center space-x-2">
                           <Users className="w-4 h-4" />
-                          <span>{tarea?.aula?.grado || 'Sin grado'} - {tarea?.aula?.seccion || 'Sin sección'}</span>
+                          <span>{tarea?.aulaInfo?.grado || tarea?.aula?.idGrado?.grado || 'Sin grado'} - {tarea?.aulaInfo?.seccion || tarea?.aula?.seccion || 'Sin sección'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4" />
-                          <span>Vence: {formatFecha(tarea?.fechaLimite)}</span>
+                          <span>Vence: {formatFecha(tarea?.fechaEntrega || tarea?.fechaLimite)}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Target className="w-4 h-4" />
@@ -573,7 +591,7 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
                                     <span className="text-sm font-medium">Pendiente</span>
                                   </div>
                                   <p className="text-xs text-gray-500">
-                                    Vence: {formatFecha(tarea?.fechaLimite)}
+                                    Vence: {formatFecha(tarea?.fechaEntrega || tarea?.fechaLimite)}
                                   </p>
                                 </div>
                               </div>
@@ -602,19 +620,58 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Nombre</label>
                                   <p className="mt-1 text-sm text-gray-900">
-                                    {tarea.idTrabajador?.nombre} {tarea.idTrabajador?.apellido}
+                                    {tarea.trabajadorInfo?.nombre || `${tarea.idTrabajador?.nombre || ''} ${tarea.idTrabajador?.apellido || ''}`.trim() || 'No especificado'}
                                   </p>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Correo</label>
                                   <p className="mt-1 text-sm text-gray-900">
-                                    {tarea.idTrabajador?.correo || 'No especificado'}
+                                    {tarea.trabajadorInfo?.correo || tarea.idTrabajador?.correo || 'No especificado'}
                                   </p>
                                 </div>
                                 <div>
-                                  <label className="text-sm font-medium text-gray-500">ID del Profesor</label>
+                                  <label className="text-sm font-medium text-gray-500">Rol</label>
                                   <p className="mt-1 text-sm text-gray-900">
-                                    {tarea.idTrabajador?.idTrabajador || 'No especificado'}
+                                    {tarea.trabajadorInfo?.rol || tarea.idTrabajador?.idRol?.nombre || 'No especificado'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Documento</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {tarea.idTrabajador?.tipoDocumento}: {tarea.idTrabajador?.nroDocumento || 'No especificado'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Información del aula */}
+                          <div>
+                            <h4 className="text-lg font-medium text-gray-900 mb-4">Información del Aula</h4>
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Grado</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {tarea.aulaInfo?.grado || tarea.aula?.idGrado?.grado || 'No especificado'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Sección</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {tarea.aulaInfo?.seccion || tarea.aula?.seccion || 'No especificado'}
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Cantidad de Estudiantes</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {tarea.aulaInfo?.cantidadEstudiantes || tarea.aula?.cantidadEstudiantes || 0} estudiantes
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">ID del Aula</label>
+                                  <p className="mt-1 text-xs text-gray-900 font-mono">
+                                    {tarea.aulaInfo?.idAula || tarea.aula?.idAula || 'No especificado'}
                                   </p>
                                 </div>
                               </div>
@@ -628,26 +685,33 @@ const TareaCompletaModal = ({ isOpen, onClose, tarea }) => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">ID de la Tarea</label>
-                                  <p className="mt-1 text-sm text-gray-900 font-mono">
+                                  <p className="mt-1 text-xs text-gray-900 font-mono">
                                     {tarea.idTarea}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">ID del Aula</label>
-                                  <p className="mt-1 text-sm text-gray-900 font-mono">
-                                    {tarea.aula?.idAula || 'No especificado'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Prioridad</label>
-                                  <p className="mt-1 text-sm text-gray-900">
-                                    {tarea.prioridad || 'No especificada'}
                                   </p>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Estado Actual</label>
                                   <p className="mt-1 text-sm text-gray-900">
-                                    {tarea.estado || 'No especificado'}
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                      tarea.estado === 'activa' ? 'bg-green-100 text-green-800' :
+                                      tarea.estado === 'vencida' ? 'bg-red-100 text-red-800' :
+                                      tarea.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {tarea.estado || 'No especificado'}
+                                    </span>
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Fecha de Asignación</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {formatFecha(tarea.fechaAsignacion)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Fecha de Entrega</label>
+                                  <p className="mt-1 text-sm text-gray-900">
+                                    {formatFecha(tarea.fechaEntrega)}
                                   </p>
                                 </div>
                               </div>

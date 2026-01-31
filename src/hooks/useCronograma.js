@@ -9,7 +9,7 @@ export const useCronograma = () => {
     queryKey: ['cronogramas'],
     queryFn: async () => {
       try {
-        const response = await fetch('https://nidopro.up.railway.app/api/v1/cronograma', {
+        const response = await fetch('http://localhost:3002/api/v1/cronograma', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

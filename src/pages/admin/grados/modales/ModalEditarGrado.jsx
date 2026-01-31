@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { Loader2, CheckCircle, ChevronDown } from 'lucide-react';
@@ -6,34 +6,39 @@ import { toast } from 'sonner';
 import useGradosSimple from '../../../../hooks/useGrados';
 import { usePensionesOptions } from '../../../../hooks/usePensiones';
 
-const ModalAgregarGrado = ({ isOpen, onClose }) => {
+const ModalEditarGrado = ({ isOpen, onClose, grado }) => {
   const [form, setForm] = useState({
     grado: '',
     descripcion: '',
-    estaActivo: true,
     idPension: ''
   });
   const [loading, setLoading] = useState(false);
-  const { crearGrado } = useGradosSimple();
+  const { editarGrado } = useGradosSimple();
   const { options: pensionesOptions, isLoading: loadingPensiones, hasPensiones } = usePensionesOptions();
 
+  useEffect(() => {
+    if (grado && isOpen) {
+      setForm({
+        grado: grado.grado || '',
+        descripcion: grado.descripcion || '',
+        idPension: grado.idPension?.idPension || ''
+      });
+    }
+  }, [grado, isOpen]);
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validaciones
+
     if (!form.grado.trim()) {
       toast.error('El nombre del grado es requerido');
       return;
     }
-    
+
     if (!form.idPension) {
       toast.error('Debe seleccionar una pensión');
       return;
@@ -41,12 +46,11 @@ const ModalAgregarGrado = ({ isOpen, onClose }) => {
 
     setLoading(true);
     try {
-      await crearGrado(form);
-      toast.success('Grado creado correctamente');
-      setForm({ grado: '', descripcion: '', estaActivo: true, idPension: '' });
+      await editarGrado(grado.idGrado, form);
+      toast.success('Grado actualizado correctamente');
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Error al crear grado');
+      toast.error(error.message || 'Error al actualizar grado');
     } finally {
       setLoading(false);
     }
@@ -79,7 +83,7 @@ const ModalAgregarGrado = ({ isOpen, onClose }) => {
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900 mb-4">
-                  Crear nuevo grado académico
+                  Editar grado académico
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -135,11 +139,6 @@ const ModalAgregarGrado = ({ isOpen, onClose }) => {
                         <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
                     )}
-                    {form.idPension && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Pensión seleccionada: {pensionesOptions.find(p => p.value === form.idPension)?.label}
-                      </p>
-                    )}
                   </div>
                   <div className="flex justify-end pt-2">
                     <button
@@ -156,7 +155,7 @@ const ModalAgregarGrado = ({ isOpen, onClose }) => {
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                      <span>{!hasPensiones ? 'Sin pensiones' : 'Crear'}</span>
+                      <span>Guardar</span>
                     </button>
                   </div>
                 </form>
@@ -169,4 +168,4 @@ const ModalAgregarGrado = ({ isOpen, onClose }) => {
   );
 };
 
-export default ModalAgregarGrado;
+export default ModalEditarGrado;

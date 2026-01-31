@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Save } from 'lucide-react';
+import { X, Loader2, CheckCircle } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useCrearPeriodoEscolar } from '../../../../hooks/queries/usePeriodoEscolarQueries';
@@ -9,17 +9,16 @@ const CrearPeriodoModal = ({ isOpen, onClose }) => {
     anioEscolar: new Date().getFullYear(),
     fechaInicio: '',
     fechaFin: '',
-    estaActivo: true,
     descripcion: ''
   });
 
   const crearPeriodoMutation = useCrearPeriodoEscolar();
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -27,28 +26,31 @@ const CrearPeriodoModal = ({ isOpen, onClose }) => {
     e.preventDefault();
 
     try {
-      await crearPeriodoMutation.mutateAsync(formData);
-      onClose();
+      await crearPeriodoMutation.mutateAsync({
+        ...formData,
+        estaActivo: true
+      });
+      handleClose();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
-      // Reset form
+  const handleClose = () => {
+    if (!crearPeriodoMutation.isPending) {
       setFormData({
         anioEscolar: new Date().getFullYear(),
         fechaInicio: '',
         fechaFin: '',
-        estaActivo: true,
         descripcion: ''
       });
-    } catch (error) {
-      console.error('Error:', error);
-      // El error ya se maneja en el hook
+      onClose();
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -58,7 +60,7 @@ const CrearPeriodoModal = ({ isOpen, onClose }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/20" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -72,123 +74,113 @@ const CrearPeriodoModal = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Calendar className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <Dialog.Title as="h2" className="text-xl font-bold text-gray-900">
-                      Crear Período Escolar
-                    </Dialog.Title>
-                  </div>
+              <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                    Crear Período Escolar
+                  </Dialog.Title>
                   <button
-                    onClick={onClose}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={handleClose}
+                    disabled={crearPeriodoMutation.isPending}
+                    className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                   >
-                    <X className="w-5 h-5 text-gray-500" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Año Escolar */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Año Escolar
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Año Escolar *
                     </label>
                     <input
                       type="number"
                       name="anioEscolar"
                       value={formData.anioEscolar}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                       placeholder="2025"
                       required
+                      disabled={crearPeriodoMutation.isPending}
                     />
                   </div>
 
-                  {/* Fecha Inicio */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Inicio
-                    </label>
-                    <input
-                      type="date"
-                      name="fechaInicio"
-                      value={formData.fechaInicio}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-
-                  {/* Fecha Fin */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Fin
-                    </label>
-                    <input
-                      type="date"
-                      name="fechaFin"
-                      value={formData.fechaFin}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-
-                  {/* Estado Activo */}
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="estaActivo"
-                      checked={formData.estaActivo}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 block text-sm text-gray-700">
-                      Período activo
-                    </label>
+                  {/* Fechas */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fecha de Inicio *
+                      </label>
+                      <input
+                        type="date"
+                        name="fechaInicio"
+                        value={formData.fechaInicio}
+                        onChange={handleInputChange}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                        required
+                        disabled={crearPeriodoMutation.isPending}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fecha de Fin *
+                      </label>
+                      <input
+                        type="date"
+                        name="fechaFin"
+                        value={formData.fechaFin}
+                        onChange={handleInputChange}
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                        required
+                        disabled={crearPeriodoMutation.isPending}
+                      />
+                    </div>
                   </div>
 
                   {/* Descripción */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Descripción
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Descripción *
                     </label>
                     <textarea
                       name="descripcion"
                       value={formData.descripcion}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                       placeholder="Descripción del período escolar..."
                       required
+                      disabled={crearPeriodoMutation.isPending}
                     />
                   </div>
 
-                  {/* Buttons */}
-                  <div className="flex space-x-3 pt-4">
+                  {/* Botones */}
+                  <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
-                      onClick={onClose}
-                      className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      onClick={handleClose}
+                      disabled={crearPeriodoMutation.isPending}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={crearPeriodoMutation.isPending}
-                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center"
                     >
                       {crearPeriodoMutation.isPending ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creando...
+                        </>
                       ) : (
-                        <Save className="w-4 h-4" />
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Crear Período
+                        </>
                       )}
-                      <span>{crearPeriodoMutation.isPending ? 'Creando...' : 'Crear'}</span>
                     </button>
                   </div>
                 </form>

@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base URL del API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 
 // Configuración de axios
 const api = axios.create({

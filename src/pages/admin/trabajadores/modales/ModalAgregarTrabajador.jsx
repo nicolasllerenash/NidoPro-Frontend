@@ -3,10 +3,12 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Dialog, Transition } from "@headlessui/react";
-import { X, User, Save, UserPlus, Loader2 } from "lucide-react";
+import { X, CheckCircle, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import trabajadorService from "src/services/trabajadorService";
+import { useCursos } from "src/hooks/useCursos";
+import { useCreateAsignacionCurso } from "src/hooks/queries/useAsignacionCursosQueries";
 
 // IDs de roles disponibles
 const ROLES = [
@@ -15,8 +17,9 @@ const ROLES = [
   { id: "34221058-9fdd-4187-b9eb-c4ae79e92b35", nombre: "ADMINISTRADOR" },
   { id: "8c31ef16-3316-4788-a3d4-cf40d053b95f", nombre: "ESPECIALISTA" },
 ];
+const DOCENTE_ROLE_ID = "7c643246-b7ee-4982-aedb-53fc27d19ed2";
 
-// Esquema de validación simplificado
+// Esquema de validación
 const validationSchema = yup.object({
   nombre: yup.string().required("El nombre es requerido").trim(),
   apellido: yup.string().required("El apellido es requerido").trim(),
@@ -26,40 +29,23 @@ const validationSchema = yup.object({
     .required("El número de documento es requerido")
     .trim(),
   idRol: yup.string().required("El rol es requerido"),
+  idCurso: yup.string().when("idRol", {
+    is: DOCENTE_ROLE_ID,
+    then: (schema) => schema.required("Seleccione un curso"),
+    otherwise: (schema) => schema.nullable(),
+  }),
   correo: yup.string().email("El correo no es válido").nullable(),
   telefono: yup.string().nullable(),
   direccion: yup.string().nullable(),
-  estaActivo: yup.boolean(),
 });
-
-// Componente FormField reutilizable
-const FormField = ({ label, error, required, children, className = "" }) => (
-  <div className={className}>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    {children}
-    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-  </div>
-);
 
 const ModalAgregarTrabajador = ({ isOpen, onClose, onSuccess }) => {
   const queryClient = useQueryClient();
+  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
+  const asignarCursoMutation = useCreateAsignacionCurso();
 
-  // Mutation para crear trabajador simple
   const createMutation = useMutation({
     mutationFn: (data) => trabajadorService.createTrabajadorSimple(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trabajadores"] });
-      toast.success("¡Trabajador creado exitosamente!");
-      handleClose();
-      if (onSuccess) onSuccess();
-    },
-    onError: (error) => {
-      toast.error("Error al crear trabajador", {
-        description: error.message,
-      });
-    },
   });
 
   const {
@@ -67,6 +53,7 @@ const ModalAgregarTrabajador = ({ isOpen, onClose, onSuccess }) => {
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -78,32 +65,56 @@ const ModalAgregarTrabajador = ({ isOpen, onClose, onSuccess }) => {
       telefono: "",
       direccion: "",
       idRol: "",
-      estaActivo: true,
+      idCurso: "",
     },
   });
 
   const onSubmit = async (data) => {
     try {
-      console.log("📋 Creando trabajador:", data);
+      const { idCurso, ...trabajadorData } = data;
+      trabajadorData.estaActivo = true;
+      const response = await createMutation.mutateAsync(trabajadorData);
 
-      // Crear trabajador usando la mutation
-      await createMutation.mutateAsync(data);
+      const createdId =
+        response?.trabajador?.idTrabajador ||
+        response?.trabajador?.id ||
+        response?.data?.idTrabajador ||
+        response?.data?.id ||
+        response?.info?.data?.idTrabajador;
+
+      if (data.idRol === DOCENTE_ROLE_ID && idCurso) {
+        if (!createdId) {
+          throw new Error("No se pudo obtener el ID del trabajador creado");
+        }
+        await asignarCursoMutation.mutateAsync({
+          idCurso,
+          idTrabajador: createdId,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["trabajadores"] });
+      toast.success("¡Trabajador creado exitosamente!");
+      handleClose();
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("❌ Error al crear trabajador:", error);
+      toast.error("Error al crear trabajador", {
+        description: error.message,
+      });
     }
   };
 
   const handleClose = () => {
-    reset();
-    onClose();
+    if (!createMutation.isPending) {
+      reset();
+      onClose();
+    }
   };
 
-  const inputClassName = (fieldError) =>
-    `w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-      fieldError ? "border-red-500" : "border-gray-300"
-    }`;
-
   const creating = createMutation.isPending;
+  const selectedRol = watch("idRol");
+
+  const inputClass = (fieldError) =>
+    `block w-full px-3 py-2 border ${fieldError ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50`;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -117,7 +128,7 @@ const ModalAgregarTrabajador = ({ isOpen, onClose, onSuccess }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/20 bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -131,208 +142,199 @@ const ModalAgregarTrabajador = ({ isOpen, onClose, onSuccess }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <UserPlus className="w-6 h-6 text-blue-600" />
-                    <Dialog.Title className="text-xl font-semibold text-gray-900">
-                      Agregar Nuevo Trabajador
-                    </Dialog.Title>
-                  </div>
+              <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                    Crear Nuevo Trabajador
+                  </Dialog.Title>
                   <button
                     onClick={handleClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
                     disabled={creating}
+                    className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Form */}
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="p-6 space-y-6"
-                >
-                  {/* Información Personal */}
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                      <User className="w-5 h-5 text-blue-600" />
-                      Información Personal
-                    </h3>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre *
+                      </label>
+                      <input
+                        {...register("nombre")}
+                        className={inputClass(errors.nombre)}
+                        placeholder="Ej: Walter Eduardo"
+                        disabled={creating}
+                      />
+                      {errors.nombre && (
+                        <p className="text-red-500 text-sm mt-1">{errors.nombre.message}</p>
+                      )}
+                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        label="Nombre"
-                        required
-                        error={errors.nombre?.message}
-                      >
-                        <input
-                          {...register("nombre")}
-                          className={inputClassName(errors.nombre)}
-                          placeholder="Ej: Walter Eduardo"
-                          disabled={creating}
-                        />
-                      </FormField>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Apellido *
+                      </label>
+                      <input
+                        {...register("apellido")}
+                        className={inputClass(errors.apellido)}
+                        placeholder="Ej: Martinez Gonzales"
+                        disabled={creating}
+                      />
+                      {errors.apellido && (
+                        <p className="text-red-500 text-sm mt-1">{errors.apellido.message}</p>
+                      )}
+                    </div>
 
-                      <FormField
-                        label="Apellido"
-                        required
-                        error={errors.apellido?.message}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo de Documento *
+                      </label>
+                      <select
+                        {...register("tipoDocumento")}
+                        className={inputClass(errors.tipoDocumento)}
+                        disabled={creating}
                       >
-                        <input
-                          {...register("apellido")}
-                          className={inputClassName(errors.apellido)}
-                          placeholder="Ej: Martinez Gonzales"
-                          disabled={creating}
-                        />
-                      </FormField>
+                        <option value="DNI">DNI</option>
+                        <option value="CE">Carnet de Extranjería</option>
+                        <option value="PASAPORTE">Pasaporte</option>
+                      </select>
+                    </div>
 
-                      <FormField
-                        label="Tipo de Documento"
-                        required
-                        error={errors.tipoDocumento?.message}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Número de Documento *
+                      </label>
+                      <input
+                        {...register("nroDocumento")}
+                        className={inputClass(errors.nroDocumento)}
+                        placeholder="Ej: 24323234"
+                        disabled={creating}
+                      />
+                      {errors.nroDocumento && (
+                        <p className="text-red-500 text-sm mt-1">{errors.nroDocumento.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Rol *
+                      </label>
+                      <select
+                        {...register("idRol")}
+                        className={inputClass(errors.idRol)}
+                        disabled={creating}
                       >
+                        <option value="">Seleccione un rol</option>
+                        {ROLES.map((rol) => (
+                          <option key={rol.id} value={rol.id}>
+                            {rol.nombre}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.idRol && (
+                        <p className="text-red-500 text-sm mt-1">{errors.idRol.message}</p>
+                      )}
+                    </div>
+
+                    {selectedRol === DOCENTE_ROLE_ID && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Curso *
+                        </label>
                         <select
-                          {...register("tipoDocumento")}
-                          className={inputClassName(errors.tipoDocumento)}
-                          disabled={creating}
+                          {...register("idCurso")}
+                          className={inputClass(errors.idCurso)}
+                          disabled={creating || loadingCursos}
                         >
-                          <option value="DNI">DNI</option>
-                          <option value="CE">Carnet de Extranjería</option>
-                          <option value="PASAPORTE">Pasaporte</option>
-                        </select>
-                      </FormField>
-
-                      <FormField
-                        label="Número de Documento"
-                        required
-                        error={errors.nroDocumento?.message}
-                      >
-                        <input
-                          {...register("nroDocumento")}
-                          className={inputClassName(errors.nroDocumento)}
-                          placeholder="Ej: 24323234"
-                          disabled={creating}
-                        />
-                      </FormField>
-
-                      <FormField
-                        label="Rol"
-                        required
-                        error={errors.idRol?.message}
-                        className="md:col-span-2"
-                      >
-                        <select
-                          {...register("idRol")}
-                          className={inputClassName(errors.idRol)}
-                          disabled={creating}
-                        >
-                          <option value="">Seleccione un rol</option>
-                          {ROLES.map((rol) => (
-                            <option key={rol.id} value={rol.id}>
-                              {rol.nombre}
+                          <option value="">Seleccione un curso</option>
+                          {cursos.map((curso) => (
+                            <option
+                              key={curso.idCurso || curso.id}
+                              value={curso.idCurso || curso.id}
+                            >
+                              {curso.nombreCurso || curso.nombre}
                             </option>
                           ))}
                         </select>
-                      </FormField>
+                        {errors.idCurso && (
+                          <p className="text-red-500 text-sm mt-1">{errors.idCurso.message}</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Correo Electrónico
+                      </label>
+                      <input
+                        type="email"
+                        {...register("correo")}
+                        className={inputClass(errors.correo)}
+                        placeholder="Ej: ejemplo@correo.com"
+                        disabled={creating}
+                      />
+                      {errors.correo && (
+                        <p className="text-red-500 text-sm mt-1">{errors.correo.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Teléfono
+                      </label>
+                      <input
+                        {...register("telefono")}
+                        className={inputClass(errors.telefono)}
+                        placeholder="Ej: 925757151"
+                        disabled={creating}
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Dirección
+                      </label>
+                      <input
+                        {...register("direccion")}
+                        className={inputClass(errors.direccion)}
+                        placeholder="Ej: AV. MICHAEL FARADAY NRO. 1060"
+                        disabled={creating}
+                      />
                     </div>
                   </div>
 
-                  {/* Información de Contacto (Opcional) */}
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                      <User className="w-5 h-5 text-gray-600" />
-                      Información de Contacto{" "}
-                      <span className="text-sm text-gray-500 font-normal">
-                        (Opcional)
-                      </span>
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        label="Correo Electrónico"
-                        error={errors.correo?.message}
-                      >
-                        <input
-                          type="email"
-                          {...register("correo")}
-                          className={inputClassName(errors.correo)}
-                          placeholder="Ej: ejemplo@correo.com"
-                          disabled={creating}
-                        />
-                      </FormField>
-
-                      <FormField
-                        label="Teléfono"
-                        error={errors.telefono?.message}
-                      >
-                        <input
-                          {...register("telefono")}
-                          className={inputClassName(errors.telefono)}
-                          placeholder="Ej: 925757151"
-                          disabled={creating}
-                        />
-                      </FormField>
-
-                      <FormField
-                        label="Dirección"
-                        error={errors.direccion?.message}
-                        className="md:col-span-2"
-                      >
-                        <input
-                          {...register("direccion")}
-                          className={inputClassName(errors.direccion)}
-                          placeholder="Ej: AV. MICHAEL FARADAY NRO. 1060"
-                          disabled={creating}
-                        />
-                      </FormField>
-
-                      <FormField
-                        label="Estado"
-                        error={errors.estaActivo?.message}
-                      >
-                        <select
-                          {...register("estaActivo")}
-                          className={inputClassName(errors.estaActivo)}
-                          disabled={creating}
-                        >
-                          <option value={true}>Activo</option>
-                          <option value={false}>Inactivo</option>
-                        </select>
-                      </FormField>
-                    </div>
+                  {/* Botones */}
+                  <div className="flex justify-end space-x-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      disabled={creating}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={creating}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center"
+                    >
+                      {creating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creando...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Crear Trabajador
+                        </>
+                      )}
+                    </button>
                   </div>
                 </form>
-
-                {/* Footer Buttons */}
-                <div className="flex justify-end gap-3 p-6 bg-gray-50 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    disabled={creating}
-                    className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSubmit(onSubmit)}
-                    disabled={creating}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
-                  >
-                    {creating ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Guardar Trabajador
-                      </>
-                    )}
-                  </button>
-                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>

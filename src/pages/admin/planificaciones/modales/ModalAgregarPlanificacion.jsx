@@ -175,9 +175,9 @@ const ModalAgregarPlanificacion = ({ open, onClose, onSuccess }) => {
 
     try {
       setUploadingFile(true);
-      toast.loading('Subiendo archivo a Firebase...', { id: 'upload' });
+      toast.loading('Subiendo archivo a Google Cloud...', { id: 'upload' });
 
-      // Subir archivo a Firebase
+      // Subir archivo a Google Cloud Storage
       const uploadResult = await StorageService.uploadFile(
         selectedFile,
         'planificaciones',

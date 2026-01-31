@@ -637,7 +637,7 @@ export const usePensionesSimple = () => {
       // Usar fetch directamente para el endpoint simple
       const token = localStorage.getItem("token");
       const API_BASE_URL =
-        import.meta.env.VITE_API_URL || "https://nidopro.up.railway.app/api/v1";
+        import.meta.env.VITE_API_URL || "http://localhost:3002/api/v1";
 
       const response = await fetch(`${API_BASE_URL}/pension`, {
         method: "POST",
@@ -667,7 +667,44 @@ export const usePensionesSimple = () => {
     }
   };
 
-  return { crearPension };
+  const editarPension = async (id, data) => {
+    try {
+      const payload = {
+        monto: Number(data.monto),
+      };
+
+      const token = localStorage.getItem("token");
+      const API_BASE_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:3002/api/v1";
+
+      const response = await fetch(`${API_BASE_URL}/pension/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error al editar pensión");
+      }
+
+      const result = await response.json();
+
+      queryClient.invalidateQueries(["pensiones"]);
+      toast.success("Pensión actualizada exitosamente");
+
+      return result;
+    } catch (error) {
+      console.error("Error al editar pensión:", error);
+      toast.error(error.message || "Error al editar pensión");
+      throw error;
+    }
+  };
+
+  return { crearPension, editarPension };
 };
 
 /**
@@ -689,9 +726,7 @@ export const usePensionesOptions = () => {
 
   const options = pensiones.map((pension) => ({
     value: pension.idPension,
-    label: `S/ ${parseFloat(pension.monto).toFixed(2)} - Vence día ${
-      pension.fechaVencimientoMensual
-    }`,
+    label: `S/ ${parseFloat(pension.monto).toFixed(2)}`,
     pension: pension,
   }));
 

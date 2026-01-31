@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import VerEstudiantesEvaluadosModal from './VerEstudiantesEvaluadosModal';
 
 // Configuración de la API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
 
 // Función de debug para la consola
 window.debugAuthStorage = () => {
@@ -381,7 +381,7 @@ const EvaluarEstudianteModal = ({ isOpen, onClose, evaluacion }) => {
         idEstudiante: formData.idEstudiante
       };
 
-      const response = await fetch('https://nidopro.up.railway.app/api/v1/nota/kinder', {
+      const response = await fetch('http://localhost:3002/api/v1/nota/kinder', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

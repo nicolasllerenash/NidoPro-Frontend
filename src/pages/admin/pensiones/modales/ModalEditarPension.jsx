@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { Loader2, CheckCircle, X } from 'lucide-react';
+import { Loader2, CheckCircle, DollarSign, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { toast } from 'sonner';
 import { usePensionesSimple } from '../../../../hooks/usePensiones';
 
-// Esquema de validación simplificado - solo monto
 const schema = yup.object({
   monto: yup
     .number()
@@ -16,9 +15,9 @@ const schema = yup.object({
     .required('Monto es requerido')
 });
 
-const ModalCrearPension = ({ isOpen, onClose }) => {
+const ModalEditarPension = ({ isOpen, onClose, pension }) => {
   const [loading, setLoading] = useState(false);
-  const { crearPension } = usePensionesSimple();
+  const { editarPension } = usePensionesSimple();
 
   const {
     register,
@@ -32,25 +31,20 @@ const ModalCrearPension = ({ isOpen, onClose }) => {
     }
   });
 
+  useEffect(() => {
+    if (pension && isOpen) {
+      reset({ monto: parseFloat(pension.monto) || '' });
+    }
+  }, [pension, isOpen, reset]);
+
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      console.log('📤 Enviando datos de pensión:', data);
-
-      // Solo enviar el monto como requiere el endpoint
-      const payload = {
-        monto: Number(data.monto)
-      };
-
-      await crearPension(payload);
-
-      // Resetear formulario y cerrar modal
+      await editarPension(pension.idPension, { monto: Number(data.monto) });
       reset();
       onClose();
-      toast.success('Pensión creada exitosamente');
     } catch (error) {
-      console.error('❌ Error al crear pensión:', error);
-      toast.error(error.message || 'Error al crear pensión');
+      console.error('Error al editar pensión:', error);
     } finally {
       setLoading(false);
     }
@@ -89,63 +83,72 @@ const ModalCrearPension = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
-                    Crear Nueva Pensión
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 flex items-center">
+                    <DollarSign className="w-6 h-6 mr-2 text-blue-600" />
+                    Editar Pensión
                   </Dialog.Title>
                   <button
                     onClick={handleClose}
                     disabled={loading}
                     className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div>
-                    <label htmlFor="monto" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="monto" className="block text-sm font-medium text-gray-700 mb-2">
+                      <DollarSign className="w-4 h-4 inline mr-1" />
                       Monto de la Pensión (S/) *
                     </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      {...register('monto')}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-                      placeholder="150.50"
-                      disabled={loading}
-                    />
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSign className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        {...register('monto')}
+                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                        placeholder="150.50"
+                        disabled={loading}
+                      />
+                    </div>
                     {errors.monto && (
                       <p className="text-red-500 text-sm mt-1">{errors.monto.message}</p>
                     )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Ingrese el nuevo monto mensual de la pensión
+                    </p>
                   </div>
 
-                  {/* Botones */}
-                  <div className="flex justify-end space-x-3 pt-4">
+                  <div className="flex justify-end space-x-3 pt-6 border-t">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center"
+                      className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
                     >
                       {loading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Creando...
+                          Guardando...
                         </>
                       ) : (
                         <>
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Crear Pensión
+                          Guardar Cambios
                         </>
                       )}
                     </button>
@@ -160,4 +163,4 @@ const ModalCrearPension = ({ isOpen, onClose }) => {
   );
 };
 
-export default ModalCrearPension;
+export default ModalEditarPension;

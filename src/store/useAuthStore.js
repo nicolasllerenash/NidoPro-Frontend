@@ -32,7 +32,7 @@ const useAuthStore = create(
           const { authService } = await import("../services/authService");
           await authService.logout();
         } catch (error) {
-          console.log("Error al cerrar sesión en backend:", error);
+          // Error al cerrar sesión en backend (se ignora en cliente)
         }
 
         // Limpiar estado de Zustand
@@ -198,7 +198,6 @@ const useAuthStore = create(
           */
 
           // Si hay un token guardado, mantener el estado persistido
-          console.log("🔄 Restaurando sesión persistida desde localStorage");
 
           // Obtener el estado persistido del localStorage
           const persistedState = JSON.parse(

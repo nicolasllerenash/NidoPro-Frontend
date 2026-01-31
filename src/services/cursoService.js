@@ -1,20 +1,21 @@
 // src/services/cursoService.js
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3002/api/v1";
 
 // Configurar axios instance
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Interceptor para agregar token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -22,7 +23,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Interceptor para manejar errores de respuesta
@@ -31,11 +32,11 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Token expirado o inválido
-      localStorage.removeItem('token');
-      window.location.href = '/auth/login';
+      localStorage.removeItem("token");
+      window.location.href = "/auth/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const cursoService = {
@@ -45,13 +46,13 @@ export const cursoService = {
    */
   async getAll() {
     try {
-      console.log('📚 Obteniendo lista de cursos...');
-      const response = await axiosInstance.get('/curso');
-      console.log('✅ Cursos obtenidos:', response.data);
+      const response = await axiosInstance.get("/curso");
       return response.data;
     } catch (error) {
-      console.error('❌ Error al obtener cursos:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener los cursos');
+      console.error("❌ Error al obtener cursos:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener los cursos",
+      );
     }
   },
 
@@ -64,11 +65,13 @@ export const cursoService = {
     try {
       console.log(`📚 Obteniendo curso con ID: ${id}`);
       const response = await axiosInstance.get(`/curso/${id}`);
-      console.log('✅ Curso obtenido:', response.data);
+      console.log("✅ Curso obtenido:", response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error al obtener curso ${id}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al obtener el curso');
+      throw new Error(
+        error.response?.data?.message || "Error al obtener el curso",
+      );
     }
   },
 
@@ -79,13 +82,15 @@ export const cursoService = {
    */
   async create(cursoData) {
     try {
-      console.log('📝 Creando nuevo curso:', cursoData);
-      const response = await axiosInstance.post('/curso', cursoData);
-      console.log('✅ Curso creado:', response.data);
+      console.log("📝 Creando nuevo curso:", cursoData);
+      const response = await axiosInstance.post("/curso", cursoData);
+      console.log("✅ Curso creado:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al crear curso:', error);
-      throw new Error(error.response?.data?.message || 'Error al crear el curso');
+      console.error("❌ Error al crear curso:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al crear el curso",
+      );
     }
   },
 
@@ -99,11 +104,13 @@ export const cursoService = {
     try {
       console.log(`📝 Actualizando curso ${id}:`, cursoData);
       const response = await axiosInstance.patch(`/curso/${id}`, cursoData);
-      console.log('✅ Curso actualizado:', response.data);
+      console.log("✅ Curso actualizado:", response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error al actualizar curso ${id}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al actualizar el curso');
+      throw new Error(
+        error.response?.data?.message || "Error al actualizar el curso",
+      );
     }
   },
 
@@ -116,11 +123,13 @@ export const cursoService = {
     try {
       console.log(`🗑️ Eliminando curso ${id}`);
       const response = await axiosInstance.delete(`/curso/${id}`);
-      console.log('✅ Curso eliminado:', response.data);
+      console.log("✅ Curso eliminado:", response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error al eliminar curso ${id}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al eliminar el curso');
+      throw new Error(
+        error.response?.data?.message || "Error al eliminar el curso",
+      );
     }
   },
 
@@ -131,13 +140,13 @@ export const cursoService = {
    */
   async getByGrado(grado) {
     try {
-      console.log(`📚 Obteniendo cursos del grado ${grado}`);
       const response = await axiosInstance.get(`/curso/grado/${grado}`);
-      console.log('✅ Cursos obtenidos:', response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error al obtener cursos del grado ${grado}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al obtener cursos por grado');
+      throw new Error(
+        error.response?.data?.message || "Error al obtener cursos por grado",
+      );
     }
   },
 
@@ -147,13 +156,15 @@ export const cursoService = {
    */
   async getActivos() {
     try {
-      console.log('📚 Obteniendo cursos activos');
-      const response = await axiosInstance.get('/curso/activos');
-      console.log('✅ Cursos activos obtenidos:', response.data);
+      console.log("📚 Obteniendo cursos activos");
+      const response = await axiosInstance.get("/curso/activos");
+      console.log("✅ Cursos activos obtenidos:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al obtener cursos activos:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener cursos activos');
+      console.error("❌ Error al obtener cursos activos:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener cursos activos",
+      );
     }
   },
 
@@ -165,14 +176,16 @@ export const cursoService = {
   async search(query) {
     try {
       console.log(`🔍 Buscando cursos con query: ${query}`);
-      const response = await axiosInstance.get('/curso/search', {
-        params: { q: query }
+      const response = await axiosInstance.get("/curso/search", {
+        params: { q: query },
       });
-      console.log('✅ Resultados de búsqueda:', response.data);
+      console.log("✅ Resultados de búsqueda:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error en búsqueda de cursos:', error);
-      throw new Error(error.response?.data?.message || 'Error en búsqueda de cursos');
+      console.error("❌ Error en búsqueda de cursos:", error);
+      throw new Error(
+        error.response?.data?.message || "Error en búsqueda de cursos",
+      );
     }
   },
 
@@ -182,13 +195,15 @@ export const cursoService = {
    */
   async getEstadisticas() {
     try {
-      console.log('📊 Obteniendo estadísticas de cursos');
-      const response = await axiosInstance.get('/curso/estadisticas');
-      console.log('✅ Estadísticas obtenidas:', response.data);
+      console.log("📊 Obteniendo estadísticas de cursos");
+      const response = await axiosInstance.get("/curso/estadisticas");
+      console.log("✅ Estadísticas obtenidas:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al obtener estadísticas:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener estadísticas');
+      console.error("❌ Error al obtener estadísticas:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al obtener estadísticas",
+      );
     }
   },
 
@@ -198,13 +213,16 @@ export const cursoService = {
    */
   async getConMatriculas() {
     try {
-      console.log('📚 Obteniendo cursos con matrículas');
-      const response = await axiosInstance.get('/curso/matriculas');
-      console.log('✅ Cursos con matrículas obtenidos:', response.data);
+      console.log("📚 Obteniendo cursos con matrículas");
+      const response = await axiosInstance.get("/curso/matriculas");
+      console.log("✅ Cursos con matrículas obtenidos:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al obtener cursos con matrículas:', error);
-      throw new Error(error.response?.data?.message || 'Error al obtener cursos con matrículas');
+      console.error("❌ Error al obtener cursos con matrículas:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "Error al obtener cursos con matrículas",
+      );
     }
   },
 
@@ -216,15 +234,22 @@ export const cursoService = {
    */
   async matricularEstudiante(cursoId, estudianteId) {
     try {
-      console.log(`👨‍🎓 Matriculando estudiante ${estudianteId} en curso ${cursoId}`);
-      const response = await axiosInstance.post(`/curso/${cursoId}/matricular`, {
-        estudianteId
-      });
-      console.log('✅ Estudiante matriculado:', response.data);
+      console.log(
+        `👨‍🎓 Matriculando estudiante ${estudianteId} en curso ${cursoId}`,
+      );
+      const response = await axiosInstance.post(
+        `/curso/${cursoId}/matricular`,
+        {
+          estudianteId,
+        },
+      );
+      console.log("✅ Estudiante matriculado:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al matricular estudiante:', error);
-      throw new Error(error.response?.data?.message || 'Error al matricular estudiante');
+      console.error("❌ Error al matricular estudiante:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al matricular estudiante",
+      );
     }
   },
 
@@ -236,13 +261,19 @@ export const cursoService = {
    */
   async desmatricularEstudiante(cursoId, estudianteId) {
     try {
-      console.log(`👨‍🎓 Desmatriculando estudiante ${estudianteId} del curso ${cursoId}`);
-      const response = await axiosInstance.delete(`/curso/${cursoId}/matricular/${estudianteId}`);
-      console.log('✅ Estudiante desmatriculado:', response.data);
+      console.log(
+        `👨‍🎓 Desmatriculando estudiante ${estudianteId} del curso ${cursoId}`,
+      );
+      const response = await axiosInstance.delete(
+        `/curso/${cursoId}/matricular/${estudianteId}`,
+      );
+      console.log("✅ Estudiante desmatriculado:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al desmatricular estudiante:', error);
-      throw new Error(error.response?.data?.message || 'Error al desmatricular estudiante');
+      console.error("❌ Error al desmatricular estudiante:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al desmatricular estudiante",
+      );
     }
   },
 
@@ -255,11 +286,16 @@ export const cursoService = {
     try {
       console.log(`👨‍🎓 Obteniendo estudiantes del curso ${cursoId}`);
       const response = await axiosInstance.get(`/curso/${cursoId}/estudiantes`);
-      console.log('✅ Estudiantes obtenidos:', response.data);
+      console.log("✅ Estudiantes obtenidos:", response.data);
       return response.data;
     } catch (error) {
-      console.error(`❌ Error al obtener estudiantes del curso ${cursoId}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al obtener estudiantes');
+      console.error(
+        `❌ Error al obtener estudiantes del curso ${cursoId}:`,
+        error,
+      );
+      throw new Error(
+        error.response?.data?.message || "Error al obtener estudiantes",
+      );
     }
   },
 
@@ -273,13 +309,15 @@ export const cursoService = {
     try {
       console.log(`👨‍🏫 Asignando profesor ${profesorId} al curso ${cursoId}`);
       const response = await axiosInstance.post(`/curso/${cursoId}/profesor`, {
-        profesorId
+        profesorId,
       });
-      console.log('✅ Profesor asignado:', response.data);
+      console.log("✅ Profesor asignado:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al asignar profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al asignar profesor');
+      console.error("❌ Error al asignar profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al asignar profesor",
+      );
     }
   },
 
@@ -292,12 +330,16 @@ export const cursoService = {
   async removerProfesor(cursoId, profesorId) {
     try {
       console.log(`👨‍🏫 Removiendo profesor ${profesorId} del curso ${cursoId}`);
-      const response = await axiosInstance.delete(`/curso/${cursoId}/profesor/${profesorId}`);
-      console.log('✅ Profesor removido:', response.data);
+      const response = await axiosInstance.delete(
+        `/curso/${cursoId}/profesor/${profesorId}`,
+      );
+      console.log("✅ Profesor removido:", response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Error al remover profesor:', error);
-      throw new Error(error.response?.data?.message || 'Error al remover profesor');
+      console.error("❌ Error al remover profesor:", error);
+      throw new Error(
+        error.response?.data?.message || "Error al remover profesor",
+      );
     }
   },
 
@@ -310,13 +352,18 @@ export const cursoService = {
     try {
       console.log(`👨‍🏫 Obteniendo profesores del curso ${cursoId}`);
       const response = await axiosInstance.get(`/curso/${cursoId}/profesores`);
-      console.log('✅ Profesores obtenidos:', response.data);
+      console.log("✅ Profesores obtenidos:", response.data);
       return response.data;
     } catch (error) {
-      console.error(`❌ Error al obtener profesores del curso ${cursoId}:`, error);
-      throw new Error(error.response?.data?.message || 'Error al obtener profesores');
+      console.error(
+        `❌ Error al obtener profesores del curso ${cursoId}:`,
+        error,
+      );
+      throw new Error(
+        error.response?.data?.message || "Error al obtener profesores",
+      );
     }
-  }
+  },
 };
 
 export default cursoService;

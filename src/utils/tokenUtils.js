@@ -23,7 +23,6 @@ export const getEntidadIdFromToken = () => {
 
     // Decodificar el payload (segunda parte)
     const payload = JSON.parse(atob(tokenParts[1]));
-    console.log('🔍 Payload del token:', payload);
 
     return payload.entidadId || null;
   } catch (error) {
@@ -53,7 +52,6 @@ export const getIdTrabajadorFromToken = () => {
 
     // Decodificar el payload (segunda parte)
     const payload = JSON.parse(atob(tokenParts[1]));
-    console.log('🔍 Payload del token para idTrabajador:', payload);
 
     return payload.idTrabajador || payload.entidadId || null;
   } catch (error) {
@@ -83,7 +81,6 @@ export const getUserInfoFromToken = () => {
 
     // Decodificar el payload (segunda parte)
     const payload = JSON.parse(atob(tokenParts[1]));
-    console.log('🔍 Información completa del usuario:', payload);
 
     return {
       entidadId: payload.entidadId,

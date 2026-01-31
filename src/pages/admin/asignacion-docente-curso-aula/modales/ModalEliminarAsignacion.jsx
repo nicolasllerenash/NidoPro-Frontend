@@ -1,10 +1,15 @@
-import React from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
-import { useDeleteAsignacionDocenteCursoAula } from '../../../../hooks/queries/useAsignacionDocenteCursoAulaQueries';
+import React from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+import { X, AlertTriangle } from "lucide-react";
+import { useDeleteAsignacionDocenteCursoAula } from "../../../../hooks/queries/useAsignacionDocenteCursoAulaQueries";
 
-const ModalEliminarAsignacion = ({ isOpen, onClose, asignacion, onSuccess }) => {
+const ModalEliminarAsignacion = ({
+  isOpen,
+  onClose,
+  asignacion,
+  onSuccess,
+}) => {
   const deleteMutation = useDeleteAsignacionDocenteCursoAula();
 
   const handleDelete = async () => {
@@ -13,15 +18,17 @@ const ModalEliminarAsignacion = ({ isOpen, onClose, asignacion, onSuccess }) => 
       await deleteMutation.mutateAsync(id);
       onSuccess();
     } catch (error) {
-      console.error('Error al eliminar asignación:', error);
+      console.error("Error al eliminar asignación:", error);
     }
   };
 
   if (!asignacion) return null;
 
-  const docenteNombre = `${asignacion.idTrabajador?.nombre || ''} ${asignacion.idTrabajador?.apellido || ''}`.trim() || 'Sin docente';
-  const cursoNombre = asignacion.idCurso?.nombreCurso || 'Sin curso';
-  const aulaNombre = `${asignacion.idAula?.idGrado?.grado || 'Sin grado'} - Sección ${asignacion.idAula?.seccion || 'N/A'}`;
+  const docenteNombre =
+    `${asignacion.idTrabajador?.nombre || ""} ${asignacion.idTrabajador?.apellido || ""}`.trim() ||
+    "Sin docente";
+  const cursoNombre = asignacion.idCurso?.nombreCurso || "Sin curso";
+  const aulaNombre = `${asignacion.idAula?.idGrado?.grado || "Sin grado"} - Sección ${asignacion.idAula?.seccion || "N/A"}`;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -35,7 +42,7 @@ const ModalEliminarAsignacion = ({ isOpen, onClose, asignacion, onSuccess }) => 
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/20 bg-opacity-25" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -75,13 +82,16 @@ const ModalEliminarAsignacion = ({ isOpen, onClose, asignacion, onSuccess }) => 
                     </p>
                     <div className="bg-gray-50 rounded-lg p-4 text-left">
                       <p className="text-sm text-gray-600">
-                        <span className="font-semibold">Docente:</span> {docenteNombre}
+                        <span className="font-semibold">Docente:</span>{" "}
+                        {docenteNombre}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-semibold">Curso:</span> {cursoNombre}
+                        <span className="font-semibold">Curso:</span>{" "}
+                        {cursoNombre}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-semibold">Aula:</span> {aulaNombre}
+                        <span className="font-semibold">Aula:</span>{" "}
+                        {aulaNombre}
                       </p>
                     </div>
                     <p className="text-sm text-red-600 mt-3">
@@ -104,7 +114,7 @@ const ModalEliminarAsignacion = ({ isOpen, onClose, asignacion, onSuccess }) => 
                       disabled={deleteMutation.isPending}
                       className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                      {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
                     </button>
                   </div>
                 </div>

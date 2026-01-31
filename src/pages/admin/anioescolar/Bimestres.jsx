@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Table, Plus, Edit, Calendar } from 'lucide-react';
+import { Calendar, Plus, Edit } from 'lucide-react';
 import GenerarBimestresModal from './modales/GenerarBimestresModal';
 import EditarBimestresModal from './modales/EditarBimestresModal';
 import { usePeriodosEscolares } from '../../../hooks/queries/usePeriodoEscolarQueries';
 import { useBimestres } from '../../../hooks/queries/useBimestreQueries';
+import PageHeader from '../../../components/common/PageHeader';
 
 const Bimestres = () => {
   const [modalGenerarBimestres, setModalGenerarBimestres] = useState(false);
@@ -32,32 +33,24 @@ const Bimestres = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Table className="w-8 h-8 text-purple-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gestión de Bimestres</h1>
-              <p className="text-gray-600">Administra los bimestres de cada período escolar</p>
-            </div>
-          </div>
+      <PageHeader
+        title="Bimestres"
+        actions={
           <button
             onClick={() => setModalGenerarBimestres(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Generar Bimestres
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         {loadingBimestres || loadingPeriodos ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="text-gray-500 mt-4">Cargando bimestres...</p>
           </div>
         ) : errorBimestres ? (
@@ -66,17 +59,8 @@ const Bimestres = () => {
           </div>
         ) : !bimestresData?.bimestres || bimestresData.bimestres.length === 0 ? (
           <div className="text-center py-12">
-            <div className="p-8 bg-gray-50 rounded-lg">
-              <Table className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-4">No hay bimestres registrados</p>
-              <button
-                onClick={() => setModalGenerarBimestres(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Generar bimestres
-              </button>
-            </div>
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No hay bimestres registrados</p>
           </div>
         ) : (
           <div className="space-y-8">
@@ -90,10 +74,10 @@ const Bimestres = () => {
 
               return (
                 <div key={periodo.idPeriodoEscolar} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-purple-600" />
+                        <Calendar className="w-5 h-5 text-blue-600" />
                         <h3 className="text-lg font-semibold text-gray-900">
                           Año {periodo.anioEscolar}
                         </h3>
@@ -108,7 +92,7 @@ const Bimestres = () => {
                       </div>
                       <button
                         onClick={() => handleEditarBimestres(bimestresDelPeriodo, periodo)}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
                       >
                         <Edit className="w-4 h-4" />
                         Editar Fechas
@@ -139,11 +123,11 @@ const Bimestres = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {bimestresDelPeriodo.map((bimestre) => (
-                          <tr key={bimestre.idBimestre} className="hover:bg-purple-50 transition-colors">
+                          <tr key={bimestre.idBimestre} className="hover:bg-blue-50 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center space-x-3">
-                                <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                  <span className="text-purple-600 font-bold text-sm">
+                                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-blue-600 font-bold text-sm">
                                     {bimestre.numeroBimestre}
                                   </span>
                                 </div>
@@ -158,21 +142,21 @@ const Bimestres = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(bimestre.fechaInicio).toLocaleDateString('es-ES', {
+                              {new Date(bimestre.fechaInicio + 'T00:00:00').toLocaleDateString('es-ES', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'
                               })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(bimestre.fechaFin).toLocaleDateString('es-ES', {
+                              {new Date(bimestre.fechaFin + 'T00:00:00').toLocaleDateString('es-ES', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'
                               })}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {new Date(bimestre.fechaLimiteProgramacion).toLocaleDateString('es-ES', {
+                              {new Date(bimestre.fechaLimiteProgramacion + 'T00:00:00').toLocaleDateString('es-ES', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'

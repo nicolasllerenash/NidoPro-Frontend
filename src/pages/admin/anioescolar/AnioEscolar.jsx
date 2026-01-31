@@ -3,6 +3,8 @@ import { Calendar, Plus, Edit } from 'lucide-react';
 import CrearPeriodoModal from './modales/CrearPeriodoModal';
 import EditarPeriodoModal from './modales/EditarPeriodoModal';
 import { usePeriodosEscolares } from '../../../hooks/queries/usePeriodoEscolarQueries';
+import PageHeader from '../../../components/common/PageHeader';
+
 
 const AnioEscolar = () => {
   const [modalCrearPeriodo, setModalCrearPeriodo] = useState(false);
@@ -26,26 +28,18 @@ const AnioEscolar = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Calendar className="w-8 h-8 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Períodos Escolares</h1>
-              <p className="text-gray-600">Administra los períodos escolares del sistema</p>
-            </div>
-          </div>
+      <PageHeader
+        title="Períodos Escolares"
+        actions={
           <button
             onClick={() => setModalCrearPeriodo(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Crear Período
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -60,17 +54,8 @@ const AnioEscolar = () => {
           </div>
         ) : periodos.length === 0 ? (
           <div className="text-center py-12">
-            <div className="p-8 bg-gray-50 rounded-lg">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg mb-4">No hay períodos escolares registrados</p>
-              <button
-                onClick={() => setModalCrearPeriodo(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Crear primer período
-              </button>
-            </div>
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No hay períodos escolares registrados</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -105,13 +90,13 @@ const AnioEscolar = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Inicio:</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(periodo.fechaInicio).toLocaleDateString('es-ES')}
+                      {new Date(periodo.fechaInicio + 'T00:00:00').toLocaleDateString('es-ES')}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Fin:</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(periodo.fechaFin).toLocaleDateString('es-ES')}
+                      {new Date(periodo.fechaFin + 'T00:00:00').toLocaleDateString('es-ES')}
                     </span>
                   </div>
                   {periodo.descripcion && (

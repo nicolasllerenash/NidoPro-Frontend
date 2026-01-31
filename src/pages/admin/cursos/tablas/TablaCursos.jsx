@@ -1,6 +1,5 @@
 import React from 'react';
-import { DataTable, cursosColumns, cursosFilters } from '../../../../components/common/DataTable';
-import { BookOpen, Plus } from 'lucide-react';
+import { DataTable, cursosColumns } from '../../../../components/common/DataTable';
 
 const TablaCursos = ({
   cursos = [],
@@ -16,27 +15,22 @@ const TablaCursos = ({
       columns={cursosColumns}
       loading={loading}
       title="Tabla de Cursos"
-      icon={BookOpen}
       searchPlaceholder="Buscar cursos..."
-      filters={cursosFilters}
       actions={{
         add: true,
         edit: true,
-        delete: true,
-        view: true,
+        delete: false,
+        view: false,
         import: false,
         export: false
       }}
       onAdd={onAdd}
       onEdit={onEdit}
-      onDelete={onDelete}
-      onView={onView}
       emptyStateConfig={{
         title: 'No hay cursos registrados',
         description: 'Comienza agregando tu primer curso'
       }}
-      addButtonText="Agregar Curso"
-      addButtonIcon={Plus}
+      addButtonText="Crear Curso"
     />
   );
 };

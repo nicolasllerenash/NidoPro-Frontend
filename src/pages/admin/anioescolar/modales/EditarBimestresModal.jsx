@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Save, Edit } from 'lucide-react';
+import { X, Loader2, CheckCircle } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { useActualizarFechasBimestres } from '../../../../hooks/queries/useBimestreQueries';
@@ -35,7 +35,7 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
     e.preventDefault();
 
     try {
-      // Preparar datos para el endpoint
+      // Preparar datos para el endpoint (incluye fechaLimiteProgramacion sin cambios)
       const dataToSend = bimestresData.map(bimestre => ({
         id: bimestre.id,
         fechaInicio: bimestre.fechaInicio,
@@ -47,7 +47,12 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
       onClose();
     } catch (error) {
       console.error('Error:', error);
-      // El error ya se maneja en el hook
+    }
+  };
+
+  const handleClose = () => {
+    if (!actualizarFechasMutation.isPending) {
+      onClose();
     }
   };
 
@@ -55,7 +60,7 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -65,7 +70,7 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/20" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -79,37 +84,27 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Edit className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <Dialog.Title as="h2" className="text-xl font-bold text-gray-900">
-                      Editar Fechas de Bimestres
-                    </Dialog.Title>
-                  </div>
+              <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
+                    Editar Fechas de Bimestres
+                  </Dialog.Title>
                   <button
-                    type="button"
-                    className="rounded-md p-2 hover:bg-gray-100 transition-colors"
-                    onClick={onClose}
+                    onClick={handleClose}
+                    disabled={actualizarFechasMutation.isPending}
+                    className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Periodo Info */}
                 {periodo && (
-                  <div className="px-6 py-3 bg-gray-50 border-b">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Período:</span> Año {periodo.anioEscolar} - {periodo.descripcion || 'Sin descripción'}
-                    </p>
-                  </div>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Período: Año {periodo.anioEscolar} - {periodo.descripcion || 'Sin descripción'}
+                  </p>
                 )}
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-4 max-h-96 overflow-y-auto">
                     {bimestresData.map((bimestre, index) => (
                       <div key={bimestre.id} className="border border-gray-200 rounded-lg p-4">
@@ -117,7 +112,7 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
                           {bimestre.numeroBimestre}° Bimestre - {bimestre.nombreBimestre}
                         </h4>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Fecha de Inicio
@@ -126,7 +121,8 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
                               type="date"
                               value={bimestre.fechaInicio}
                               onChange={(e) => handleInputChange(index, 'fechaInicio', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={actualizarFechasMutation.isPending}
+                              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                             />
                           </div>
 
@@ -138,19 +134,8 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
                               type="date"
                               value={bimestre.fechaFin}
                               onChange={(e) => handleInputChange(index, 'fechaFin', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Límite de Programación
-                            </label>
-                            <input
-                              type="date"
-                              value={bimestre.fechaLimiteProgramacion}
-                              onChange={(e) => handleInputChange(index, 'fechaLimiteProgramacion', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={actualizarFechasMutation.isPending}
+                              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                             />
                           </div>
                         </div>
@@ -158,29 +143,29 @@ const EditarBimestresModal = ({ isOpen, onClose, bimestres, periodo }) => {
                     ))}
                   </div>
 
-                  {/* Buttons */}
-                  <div className="flex justify-end space-x-3 pt-6 border-t mt-6">
+                  {/* Botones */}
+                  <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
-                      onClick={onClose}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                      onClick={handleClose}
                       disabled={actualizarFechasMutation.isPending}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={actualizarFechasMutation.isPending}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center"
                     >
                       {actualizarFechasMutation.isPending ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Actualizando...
                         </>
                       ) : (
                         <>
-                          <Save className="w-4 h-4" />
+                          <CheckCircle className="w-4 h-4 mr-2" />
                           Actualizar Fechas
                         </>
                       )}

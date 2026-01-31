@@ -198,7 +198,17 @@ const useGradosSimple = () => {
     }
   };
   
-  return { crearGrado };
+  const editarGrado = async (id, data) => {
+    try {
+      const result = await gradoService.updateGrado(id, data);
+      queryClient.invalidateQueries(GRADOS_QUERY_KEYS.lists());
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  return { crearGrado, editarGrado };
 };
 
 export default useGradosSimple;

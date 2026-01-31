@@ -213,84 +213,32 @@ export const studentsFilters = {
 // Configuración de columnas para grados
 export const gradosColumns = [
   {
-    Header: "ID Grado",
-    accessor: "idGrado",
-    sortable: true,
-    Cell: ({ value }) => (
-      <div className="font-mono text-xs text-gray-600">
-        {value ? value.slice(0, 8) + "..." : "N/A"}
-      </div>
-    ),
-  },
-  {
     Header: "Grado",
     accessor: "grado",
     sortable: true,
-    Cell: ({ value, row }) => (
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-          <span className="text-blue-600 font-bold text-sm">
-            {value?.charAt(0)?.toUpperCase()}
-          </span>
-        </div>
-        <div>
-          <div className="font-medium text-gray-900">{value}</div>
-          <div className="text-sm text-gray-500">
-            {row.descripcion || "Sin descripción"}
-          </div>
-        </div>
-      </div>
-    ),
   },
   {
     Header: "Descripción",
     accessor: "descripcion",
-    sortable: true,
+    sortable: false,
     Cell: ({ value }) => (
-      <div className="max-w-xs truncate">
+      <div className="text-gray-600">
         {value || <span className="text-gray-400 italic">Sin descripción</span>}
       </div>
     ),
   },
   {
-    Header: "Estado",
-    accessor: "estaActivo",
-    sortable: true,
-    Cell: ({ value }) => {
-      const isActive = value === true || value === "true" || value === 1;
-      return (
-        <span
-          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-            isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}
-        >
-          {isActive ? "Activo" : "Inactivo"}
-        </span>
-      );
-    },
-  },
-  {
-    Header: "Pensión Asociada",
+    Header: "Monto",
     accessor: "idPension",
     sortable: true,
     Cell: ({ value }) => {
-      // El value es el objeto completo de pensión
       if (!value || typeof value !== "object") {
-        return <div className="text-gray-400 italic text-sm">Sin pensión</div>;
+        return <span className="text-gray-400 italic">Sin pensión</span>;
       }
-
       return (
-        <div className="space-y-1">
-          <div className="font-semibold text-green-600">
-            S/ {value.monto ? parseFloat(value.monto).toFixed(2) : "0.00"}
-          </div>
-          <div className="text-xs text-gray-500">
-            Vence día {value.fechaVencimientoMensual || "N/A"}
-          </div>
-          <div className="text-xs text-gray-400 font-mono">
-            {value.idPension ? value.idPension.slice(0, 8) + "..." : "N/A"}
-          </div>
-        </div>
+        <span className="font-semibold text-green-600">
+          S/ {value.monto ? parseFloat(value.monto).toFixed(2) : "0.00"}
+        </span>
       );
     },
   },
@@ -370,17 +318,7 @@ export const informesFilters = {
 // Configuración de columnas para pensiones base (GET /pension)
 export const pensionesColumns = [
   {
-    Header: "ID Pensión",
-    accessor: "idPension",
-    sortable: true,
-    Cell: ({ value }) => (
-      <div className="font-mono text-xs text-gray-600">
-        {value ? value.slice(0, 8) + "..." : "N/A"}
-      </div>
-    ),
-  },
-  {
-    Header: "Monto Mensual",
+    Header: "Pensión",
     accessor: "monto",
     sortable: true,
     Cell: ({ value }) => (
@@ -388,48 +326,6 @@ export const pensionesColumns = [
         <span className="font-semibold text-green-600 text-lg">
           S/ {value ? parseFloat(value).toFixed(2) : "0.00"}
         </span>
-      </div>
-    ),
-  },
-  {
-    Header: "Día de Vencimiento",
-    accessor: "fechaVencimientoMensual",
-    sortable: true,
-    Cell: ({ value }) => (
-      <div className="text-center">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-          Día {value || "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    Header: "Mora Diaria",
-    accessor: "moraDiaria",
-    sortable: true,
-    Cell: ({ value }) => (
-      <span className="font-mono text-sm text-red-600">
-        S/ {value ? parseFloat(value).toFixed(2) : "0.00"}
-      </span>
-    ),
-  },
-  {
-    Header: "Descuento Pago Adelantado",
-    accessor: "descuentoPagoAdelantado",
-    sortable: true,
-    Cell: ({ value }) => (
-      <span className="font-mono text-sm text-green-600">
-        S/ {value ? parseFloat(value).toFixed(2) : "0.00"}
-      </span>
-    ),
-  },
-  {
-    Header: "Descripción",
-    accessor: "descripcion",
-    sortable: false,
-    Cell: ({ value }) => (
-      <div className="text-sm text-gray-600 max-w-xs truncate">
-        {value || "Sin descripción"}
       </div>
     ),
   },
@@ -571,6 +467,29 @@ export const trabajadoresColumns = [
               {value.descripcion}
             </div>
           )}
+        </div>
+      );
+    },
+  },
+  {
+    Header: "Curso Asignado",
+    accessor: "asignacionCursos",
+    sortable: false,
+    Cell: ({ value }) => {
+      const cursosActivos = (value || []).filter((a) => a.estaActivo);
+      if (cursosActivos.length === 0) {
+        return <span className="text-sm text-gray-400">Sin curso</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1">
+          {cursosActivos.map((asignacion) => (
+            <span
+              key={asignacion.idAsignacionCurso}
+              className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800"
+            >
+              {asignacion.idCurso?.nombreCurso || "—"}
+            </span>
+          ))}
         </div>
       );
     },
@@ -1114,42 +1033,24 @@ export const matriculaFilters = {};
 // Configuración de columnas para aulas (GET /aula)
 export const aulasColumns = [
   {
+    Header: "Grado",
+    accessor: "idGrado",
+    sortable: true,
+    Cell: ({ value }) => (
+      <span>{value?.grado || "Sin grado"}</span>
+    ),
+  },
+  {
     Header: "Sección",
     accessor: "seccion",
     sortable: true,
-    Cell: ({ value }) => (
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-          <span className="text-sm font-medium text-indigo-600">
-            {value?.charAt(0)?.toUpperCase()}
-          </span>
-        </div>
-        <div className="font-medium text-gray-900 text-lg">Sección {value}</div>
-      </div>
-    ),
   },
   {
     Header: "Cantidad de Estudiantes",
     accessor: "cantidadEstudiantes",
     sortable: true,
     Cell: ({ value }) => (
-      <div className="flex items-center">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-          {value || 0} estudiantes
-        </span>
-      </div>
-    ),
-  },
-  {
-    Header: "Grado",
-    accessor: "idGrado",
-    sortable: true,
-    Cell: ({ value }) => (
-      <div>
-        <div className="font-medium text-gray-900">
-          {value?.grado || "Sin grado"}
-        </div>
-      </div>
+      <span>{value || 0} estudiantes</span>
     ),
   },
   {
@@ -1157,10 +1058,23 @@ export const aulasColumns = [
     accessor: "idGrado.descripcion",
     sortable: false,
     Cell: ({ row }) => (
-      <span className="text-sm text-gray-600">
-        {row.idGrado?.descripcion || "Sin descripción"}
+      <span className="text-gray-600">
+        {row.idGrado?.descripcion || <span className="text-gray-400 italic">Sin descripción</span>}
       </span>
     ),
+  },
+  {
+    Header: "Tutor",
+    accessor: "asignacionAulas",
+    sortable: false,
+    Cell: ({ value }) => {
+      const asignacionActiva = value?.find((a) => a.estadoActivo);
+      if (!asignacionActiva?.idTrabajador) {
+        return <span className="text-gray-400 italic">Sin tutor</span>;
+      }
+      const { nombre, apellido } = asignacionActiva.idTrabajador;
+      return <span>{nombre} {apellido}</span>;
+    },
   },
 ];
 
@@ -1568,17 +1482,10 @@ export const cursosColumns = [
     Header: "Curso",
     accessor: "nombreCurso",
     Cell: ({ value, row }) => (
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <span className="text-blue-600 text-lg">📚</span>
-          </div>
-        </div>
-        <div className="ml-4">
-          <div className="text-sm font-medium text-gray-900">{value}</div>
-          <div className="text-sm text-gray-500 truncate max-w-xs">
-            {row.descripcion || "Sin descripción"}
-          </div>
+      <div>
+        <div className="text-sm font-medium text-gray-900">{value}</div>
+        <div className="text-sm text-gray-500 truncate max-w-xs">
+          {row.descripcion || "Sin descripci�n"}
         </div>
       </div>
     ),
@@ -1731,3 +1638,6 @@ export const evaluacionesFilters = {
     type: "text",
   },
 };
+
+
+

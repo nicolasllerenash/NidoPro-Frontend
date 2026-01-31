@@ -24,7 +24,7 @@ const EvaluacionesEstudiantes = () => {
         return;
       }
 
-      const response = await fetch('https://nidopro.up.railway.app/api/v1/evaluacion', {
+      const response = await fetch('http://localhost:3002/api/v1/evaluacion', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,7 +63,7 @@ const EvaluacionesEstudiantes = () => {
         return;
       }
 
-      const response = await fetch('https://nidopro.up.railway.app/api/v1/curso', {
+      const response = await fetch('http://localhost:3002/api/v1/curso', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base URL del API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nidopro.up.railway.app/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
 
 // Configuración de axios
 const api = axios.create({
@@ -52,9 +52,7 @@ export const pensionService = {
    */
   async getAllPensionesBase() {
     try {
-      console.log('🔄 Obteniendo pensiones desde /pension...');
       const response = await api.get('/pension');
-      console.log('✅ Respuesta del backend - pensiones base:', response.data);
       
       // Estructura esperada: { success: true, message: "...", info: { data: [...] } }
       if (response.data?.info?.data && Array.isArray(response.data.info.data)) {

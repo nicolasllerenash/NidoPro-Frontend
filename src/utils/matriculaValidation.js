@@ -66,7 +66,6 @@ export const ensurePrimaryContact = (contactos) => {
   if (!hasPrimary) {
     // Hacer principal al primer contacto
     contactos[0].esPrincipal = true;
-    console.log('✅ Primer contacto marcado como principal automáticamente');
   }
 
   return contactos;

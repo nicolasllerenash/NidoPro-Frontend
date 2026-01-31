@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { X, BookOpen, Users, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     nombreCurso: '',
-    descripcion: '',
-    estaActivo: true
+    descripcion: ''
   });
-
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
 
-    // Limpiar error cuando el usuario empiece a escribir
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         [name]: ''
       }));
@@ -45,6 +42,14 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const resetForm = () => {
+    setFormData({
+      nombreCurso: '',
+      descripcion: ''
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -55,21 +60,13 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
 
     try {
       setLoading(true);
-      console.log('🚀 Creando curso:', formData);
-
-      await onSave(formData);
-
-      // Limpiar formulario
-      setFormData({
-        nombreCurso: '',
-        descripcion: '',
+      await onSave({
+        ...formData,
         estaActivo: true
       });
-      setErrors({});
-
+      resetForm();
     } catch (error) {
-      console.error('❌ Error al crear curso:', error);
-      // El error ya está siendo manejado por el componente padre
+      console.error('Error al crear curso:', error);
     } finally {
       setLoading(false);
     }
@@ -77,18 +74,13 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
 
   const handleClose = () => {
     if (!loading) {
-      setFormData({
-        nombreCurso: '',
-        descripcion: '',
-        estaActivo: true
-      });
-      setErrors({});
+      resetForm();
       onClose();
     }
   };
 
   const inputClassName = (fieldError) =>
-    `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+    `w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
       fieldError ? 'border-red-300' : 'border-gray-300'
     }`;
 
@@ -104,7 +96,7 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-md" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -119,21 +111,10 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <BookOpen className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <Dialog.Title as="h3" className="text-lg font-semibold text-gray-900">
-                        Crear Nuevo Curso
-                      </Dialog.Title>
-                      <p className="text-sm text-gray-500">
-                        Agrega un nuevo curso al sistema
-                      </p>
-                    </div>
-                  </div>
+                  <Dialog.Title as="h3" className="text-lg font-medium text-gray-900">
+                    Crear Curso
+                  </Dialog.Title>
                   <button
                     onClick={handleClose}
                     disabled={loading}
@@ -143,9 +124,7 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
                   </button>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Nombre del Curso */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nombre del Curso *
@@ -160,14 +139,10 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
                       disabled={loading}
                     />
                     {errors.nombreCurso && (
-                      <div className="mt-1 flex items-center text-sm text-red-600">
-                        <AlertCircle className="w-4 h-4 mr-1" />
-                        {errors.nombreCurso}
-                      </div>
+                      <p className="mt-1 text-sm text-red-600">{errors.nombreCurso}</p>
                     )}
                   </div>
 
-                  {/* Descripción */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Descripción *
@@ -182,50 +157,23 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
                       disabled={loading}
                     />
                     {errors.descripcion && (
-                      <div className="mt-1 flex items-center text-sm text-red-600">
-                        <AlertCircle className="w-4 h-4 mr-1" />
-                        {errors.descripcion}
-                      </div>
+                      <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>
                     )}
                   </div>
 
-                  {/* Estado Activo */}
-                  <div>
-                    <label className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        name="estaActivo"
-                        checked={formData.estaActivo}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          estaActivo: e.target.checked
-                        }))}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                        disabled={loading}
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        Curso activo
-                      </span>
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Si está marcado, el curso estará disponible para matriculación
-                    </p>
-                  </div>
-
-                  {/* Botones */}
-                  <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6 border-t">
+                  <div className="flex flex-col-reverse sm:flex-row gap-3 pt-6">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      className="w-full sm:w-auto px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                      className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
                     >
                       {loading ? (
                         <>
@@ -233,7 +181,10 @@ const ModalAgregarCurso = ({ isOpen, onClose, onSave }) => {
                           Creando...
                         </>
                       ) : (
-                        'Crear Curso'
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Crear Curso
+                        </>
                       )}
                     </button>
                   </div>
