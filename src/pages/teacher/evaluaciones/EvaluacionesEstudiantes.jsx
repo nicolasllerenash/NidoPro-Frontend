@@ -5,6 +5,7 @@ import CrearEvaluacionModal from './modales/CrearEvaluacionModal';
 import EvaluarEstudianteModal from './modales/EvaluarEstudianteModal';
 
 const EvaluacionesEstudiantes = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,7 +25,7 @@ const EvaluacionesEstudiantes = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3002/api/v1/evaluacion', {
+      const response = await fetch(`${API_BASE_URL}/evaluacion`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,7 +64,7 @@ const EvaluacionesEstudiantes = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3002/api/v1/curso', {
+      const response = await fetch(`${API_BASE_URL}/curso`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

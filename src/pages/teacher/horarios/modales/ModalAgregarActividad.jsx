@@ -55,6 +55,7 @@ const FormSection = ({ title, icon: Icon, iconColor, children }) => (
 );
 
 const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCreated }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const queryClient = useQueryClient();
   
   // Hooks
@@ -152,7 +153,7 @@ const ModalAgregarActividad = ({ isOpen, onClose, selectedDate = null, onEventCr
     mutationFn: async (activityData) => {
       console.log('🚀 Enviando petición con datos:', activityData);
       
-      const response = await fetch('http://localhost:3002/api/v1/cronograma', {
+      const response = await fetch(`${API_BASE_URL}/cronograma`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

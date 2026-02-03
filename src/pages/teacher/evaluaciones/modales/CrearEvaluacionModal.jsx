@@ -5,6 +5,7 @@ import { X, Calendar, FileText, BookOpen, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CrearEvaluacionModal = ({ isOpen, onClose, onSuccess, evaluacion, cursos }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [formData, setFormData] = useState({
     fecha: '',
     descripcion: '',
@@ -122,8 +123,8 @@ const CrearEvaluacionModal = ({ isOpen, onClose, onSuccess, evaluacion, cursos }
 
       // Determinar si es creación o edición
       const url = evaluacion
-        ? `http://localhost:3002/api/v1/evaluacion/${evaluacion.idEvaluacion}`
-        : 'http://localhost:3002/api/v1/evaluacion';
+        ? `${API_BASE_URL}/evaluacion/${evaluacion.idEvaluacion}`
+        : `${API_BASE_URL}/evaluacion`;
 
       const method = evaluacion ? 'PATCH' : 'POST';
 

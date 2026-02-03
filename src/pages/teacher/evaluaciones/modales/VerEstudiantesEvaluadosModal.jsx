@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import { X, Award, Users, FileText, Eye, CheckCircle } from 'lucide-react';
 
 const VerEstudiantesEvaluadosModal = ({ isOpen, onClose, idAula, evaluacion }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   const [libretaCalificaciones, setLibretaCalificaciones] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [estadisticas, setEstadisticas] = useState(null);
@@ -23,7 +24,7 @@ const VerEstudiantesEvaluadosModal = ({ isOpen, onClose, idAula, evaluacion }) =
         return;
       }
 
-      const response = await fetch(`http://localhost:3002/api/v1/nota/libreta-kinder/aula/${idAula}`, {
+      const response = await fetch(`${API_BASE_URL}/nota/libreta-kinder/aula/${idAula}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
