@@ -90,7 +90,9 @@ const useAuthStore = create(
       // Verificar si el usuario tiene un rol específico
       hasRole: (roleName) => {
         const { role } = get();
-        return role?.nombre === roleName;
+        const currentRole = role?.nombre || "";
+        const targetRole = roleName || "";
+        return currentRole.toLowerCase() === targetRole.toLowerCase();
       },
 
       // Verificar si es admin

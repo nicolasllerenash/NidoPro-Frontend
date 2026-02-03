@@ -28,7 +28,6 @@ export const useMatriculas = (filters = {}) => {
   return useQuery({
     queryKey: matriculaKeys.list(normalizedFilters),
     queryFn: () => {
-      console.log('🔄 useMatriculas - Ejecutando queryFn...');
       return matriculaService.getMatriculas(normalizedFilters);
     },
     staleTime: 5 * 60 * 1000, // 5 minutos

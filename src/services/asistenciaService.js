@@ -52,7 +52,6 @@ export const asistenciaService = {
    */
   getAllAsignaciones: async () => {
     try {
-      console.log('🔍 Obteniendo todas las asignaciones de aula');
       const response = await api.get('/asignacion-aula');
       
       console.log('✅ Asignaciones obtenidas:', response.data);

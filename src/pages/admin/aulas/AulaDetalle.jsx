@@ -38,6 +38,15 @@ const normalizeCursos = (docenteItem) => {
   return [cursos];
 };
 
+const normalizeEstudiantes = (detalle) => {
+  if (!detalle) return [];
+  const matriculas = detalle.matriculaAula || detalle.matriculas || detalle.estudiantes || [];
+  if (!Array.isArray(matriculas)) return [];
+  return matriculas
+    .map((item) => item?.matricula?.idEstudiante || item?.estudiante || item)
+    .filter(Boolean);
+};
+
 const AulaDetalle = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -48,6 +57,7 @@ const AulaDetalle = () => {
   const tutorAsignaciones = detalle.asignacionAulas || [];
   const tutor = tutorAsignaciones[0]?.idTrabajador || aula?.idTutor || detalle.tutor || detalle.tutorAsignado;
   const docentes = normalizeDocentes(detalle);
+  const estudiantes = normalizeEstudiantes(detalle);
 
   return (
     <div className="space-y-6">
@@ -149,6 +159,47 @@ const AulaDetalle = () => {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-semibold text-gray-700">Estudiantes</h3>
+            </div>
+
+            {estudiantes.length === 0 ? (
+              <p className="text-sm text-gray-500">No hay estudiantes asignados.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-left">
+                  <thead className="bg-gray-50 text-gray-700">
+                    <tr>
+                      <th className="px-3 py-2 border">N°</th>
+                      <th className="px-3 py-2 border">Estudiante</th>
+                      <th className="px-3 py-2 border">Documento</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estudiantes.map((estudiante, index) => (
+                      <tr
+                        key={estudiante.idEstudiante || estudiante.id || index}
+                        className="odd:bg-white even:bg-gray-50"
+                      >
+                        <td className="px-3 py-2 border text-center">{index + 1}</td>
+                        <td className="px-3 py-2 border">
+                          <div className="font-medium text-gray-900">
+                            {estudiante.apellido || ""} {estudiante.nombre || ""}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 border">
+                          {estudiante.tipoDocumento || "DNI"}: {estudiante.nroDocumento || ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

@@ -17,9 +17,11 @@ import Login from "./pages/auth/Login";
 import AdminLayout from "./components/layout/AdminLayout";
 import TeacherLayout from "./components/layout/TeacherLayout";
 import ParentLayout from "./components/layout/ParentLayout";
+import SecretaryLayout from "./components/layout/SecretaryLayout";
 
 // Admin Pages
 import AdminOverview from "./pages/dashboards/AdminOverview";
+import SecretaryOverview from "./pages/dashboards/SecretaryOverview";
 import Estudiantes from "./pages/admin/estudiantes/Estudiantes";
 import Matricula from "./pages/admin/matricula/Matricula";
 import Trabajadores from "./pages/admin/trabajadores/Trabajadores";
@@ -29,9 +31,6 @@ import Aulas from "./pages/admin/aulas/Aulas";
 import AulaDetalle from "./pages/admin/aulas/AulaDetalle";
 import GestionFinanciera from "./pages/admin/finanzas/GestionFinanciera";
 import Pensiones from "./pages/admin/pensiones/pensiones";
-import Reportes from "./pages/admin/reportes/Reportes";
-import Configuraciones from "./pages/admin/configuraciones/Configuracion";
-import Usuarios from "./pages/admin/usuarios/Usuarios";
 import Planificaciones from "./pages/admin/planificaciones/Planificaciones";
 import Grados from "./pages/admin/grados/aulas";
 import Cursos from "./pages/admin/cursos/Cursos";
@@ -45,8 +44,6 @@ import Acciones from "./pages/admin/anioescolar/Acciones";
 import Seguros from "./pages/admin/seguros/Seguros";
 import AdminAIChat from "./pages/admin/iachat/AIChat";
 import BimestralDocente from "./pages/admin/bimestralDocente/BimestralDocente";
-import CursosGrado from "./pages/admin/cursos-grado/CursosGrado";
-import CursosGradoDetalle from "./pages/admin/cursos-grado/CursosGradoDetalle";
 
 // Teacher Pages
 import TeacherOverview from "./pages/dashboards/TeacherOverview";
@@ -63,6 +60,9 @@ import Notas from "./pages/teacher/notas/Notas";
 
 // Parent Pages
 import ParentOverview from "./pages/dashboards/ParentOverview";
+import SecretaryReportes from "./pages/secretaria/reportes/Reportes";
+import SecretaryCaja from "./pages/secretaria/caja/Caja";
+import SecretaryPensiones from "./pages/secretaria/pensiones/Pensiones";
 import ParentTareas from "./pages/parent/tareas/Tareas";
 import ParentAsistencia from "./pages/parent/asistencia/Asistencia";
 import Anotaciones from "./pages/parent/anotaciones/Anotaciones";
@@ -148,7 +148,7 @@ function App() {
       return "/parent";
     }
     if (roleName === "secretaria") {
-      return "/admin"; // SECRETARIA usa el mismo layout que admin
+      return "/secretaria";
     }
 
     return "/login";
@@ -212,17 +212,27 @@ function App() {
               <Route path="contratos" element={<Contratos />} />
               <Route path="planilla" element={<Planilla />} />
               <Route path="seguros" element={<Seguros />} />
-              <Route path="reportes" element={<Reportes />} />
               <Route path="ai-chat" element={<AdminAIChat />} />
-              <Route path="usuarios" element={<Usuarios />} />
               <Route path="anio-escolar" element={<AnioEscolar />} />
               <Route path="bimestres" element={<Bimestres />} />
               <Route path="acciones-periodo" element={<Acciones />} />
               <Route path="grados" element={<Grados />} />
               <Route path="cursos" element={<Cursos />} />
-              <Route path="cursos-grado" element={<CursosGrado />} />
-              <Route path="cursos-grado/:idGrado" element={<CursosGradoDetalle />} />
-              <Route path="configuraciones" element={<Configuraciones />} />
+            </Route>
+
+            {/* ========== SECRETARIA ROUTES ========== */}
+            <Route
+              path="/secretaria"
+              element={
+                <ProtectedRoute requiredRole="SECRETARIA">
+                  <SecretaryLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<SecretaryOverview />} />
+              <Route path="reportes" element={<SecretaryReportes />} />
+              <Route path="caja" element={<SecretaryCaja />} />
+              <Route path="pensiones" element={<SecretaryPensiones />} />
             </Route>
 
             {/* ========== TEACHER ROUTES ========== */}

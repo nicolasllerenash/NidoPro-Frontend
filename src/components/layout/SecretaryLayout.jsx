@@ -1,175 +1,61 @@
 import React, { useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { useAuthStore } from "../../store";
 import {
   BarChart3,
-  Users as UsersIcon,
-  GraduationCap,
-  UserCheck,
-  BookOpen,
-  DollarSign,
   FileText,
-  Settings,
-  School,
   LogOut,
-  Banknote,
-  CircleUser,
-  Clock,
   ChevronRight,
   Menu,
   X,
-  ClipboardList,
-  Award,
-  MessageCircle,
-  Shield,
-  Calendar,
-  Zap,
+  CircleUser,
+  DollarSign,
+  Banknote,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
-const AdminLayout = () => {
+const SecretaryLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { logout, user } = useAuthStore();
 
   const menuItems = [
-    // DASHBOARD PRINCIPAL
     {
-      path: "/admin",
+      path: "/secretaria",
       label: "Panel Principal",
       icon: BarChart3,
       category: "dashboard",
     },
-
-    // GESTIÓN DE PERSONAS
     {
-      path: "/admin/estudiantes",
-      label: "Estudiantes",
-      icon: CircleUser,
-      category: "personas",
+      path: "/secretaria/reportes",
+      label: "Reportes",
+      icon: FileText,
+      category: "reportes",
     },
     {
-      path: "/admin/padres",
-      label: "Padres de Familia",
-      icon: UserCheck,
-      category: "personas",
+      path: "/secretaria/caja",
+      label: "Caja",
+      icon: DollarSign,
+      category: "finanzas",
     },
     {
-      path: "/admin/trabajadores",
-      label: "Trabajadores",
-      icon: UsersIcon,
-      category: "personas",
-    },
-
-    // CONFIGURACIÓN INICIAL (Orden optimizado para setup)
-    {
-      path: "/admin/pensiones",
+      path: "/secretaria/pensiones",
       label: "Pensiones",
       icon: Banknote,
-      category: "configuracion",
+      category: "finanzas",
     },
-    {
-      path: "/admin/grados",
-      label: "Grados",
-      icon: School,
-      category: "configuracion",
-    },
-    {
-      path: "/admin/aulas",
-      label: "Aulas",
-      icon: School,
-      category: "configuracion",
-    },
-    {
-      path: "/admin/anio-escolar",
-      label: "Periodo Escolar",
-      icon: Clock,
-      category: "configuracion",
-    },
-    {
-      path: "/admin/bimestres",
-      label: "Bimestres",
-      icon: Calendar,
-      category: "configuracion",
-    },
-    // {
-    //   path: "/admin/acciones-periodo",
-    //   label: "Acciones Rápidas",
-    //   icon: Zap,
-    //   category: "configuracion",
-    // },
-    {
-      path: "/admin/cursos",
-      label: "Cursos",
-      icon: BookOpen,
-      category: "configuracion",
-    },
-
-    // ACADÉMICO
-    {
-      path: "/admin/matricula",
-      label: "Matrícula",
-      icon: GraduationCap,
-      category: "academico",
-    },
-    {
-      path: "/admin/asignacion-aula",
-      label: "Asignación de Aulas",
-      icon: BookOpen,
-      category: "academico",
-    },
-    {
-      path: "/admin/planificaciones",
-      label: "Planificaciones",
-      icon: FileText,
-      category: "academico",
-    },
-    {
-      path: "/admin/cronogramas",
-      label: "Cronogramas",
-      icon: Clock,
-      category: "academico",
-    },
-    {
-      path: "/admin/evaluacion-docente",
-      label: "Comentario Docente",
-      icon: Award,
-      category: "academico",
-    },
-    {
-      path: "/admin/bimestral-docente",
-      label: "Evaluación Bimestral",
-      icon: ClipboardList,
-      category: "academico",
-    },
-
-    // REPORTES Y HERRAMIENTAS
-    {
-      path: "/admin/ai-chat",
-      label: "Asistente IA",
-      icon: MessageCircle,
-      category: "herramientas",
-    },
-
-    // USUARIOS Y CONFIGURACIÓN AVANZADA
   ];
 
   const getCategoryLabel = (category) => {
     const labels = {
       dashboard: "Dashboard",
-      personas: "Personas",
-      academico: "Académico",
-      infraestructura: "Infraestructura",
-      finanzas: "Finanzas",
-      administrativo: "Administrativo",
       reportes: "Reportes",
-      herramientas: "Herramientas",
-      usuarios: "Usuarios",
-      configuracion: "Configuración",
+      finanzas: "Finanzas",
     };
     return labels[category] || category;
   };
@@ -177,17 +63,10 @@ const AdminLayout = () => {
   const getCategoryIcon = (category) => {
     const icons = {
       dashboard: BarChart3,
-      personas: UsersIcon,
-      academico: GraduationCap,
-      infraestructura: School,
+      reportes: FileText,
       finanzas: DollarSign,
-      administrativo: FileText,
-      reportes: BarChart3,
-      herramientas: MessageCircle,
-      usuarios: CircleUser,
-      configuracion: Settings,
     };
-    return icons[category] || GraduationCap;
+    return icons[category] || BarChart3;
   };
 
   const handleLogoutClick = () => setIsLogoutModalOpen(true);
@@ -202,21 +81,32 @@ const AdminLayout = () => {
       {/* Top Header */}
       <header className="fixed inset-x-0 top-0 z-50">
         <div className="flex w-full">
-          <div className="w-full bg-blue-800 border-gray-200 px-4 lg:px-6 py-4">
+          <div className="w-full bg-blue-300 border-gray-200 px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center">
                 <button
-                  className="lg:hidden p-2 text-white hover:text-gray-300"
+                  className="lg:hidden p-2 text-blue-900 hover:text-blue-700"
                   onClick={() => setIsMobileMenuOpen(true)}
                 >
                   <Menu className="w-6 h-6" />
                 </button>
+                <button
+                  className="hidden lg:flex p-2 text-blue-900 hover:text-blue-700 transition-colors rounded-md hover:bg-blue-100"
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  title={isSidebarCollapsed ? "Expandir menu" : "Colapsar menu"}
+                >
+                  {isSidebarCollapsed ? (
+                    <PanelLeftOpen className="w-5 h-5" />
+                  ) : (
+                    <PanelLeftClose className="w-5 h-5" />
+                  )}
+                </button>
               </div>
               <div className="flex-1 ml-4">
-                <h1 className="text-xl lg:text-2xl font-bold text-white">
-                  Panel de Administración
+                <h1 className="text-xl lg:text-2xl font-bold text-black">
+                  Panel de Secretaría
                 </h1>
-                <p className="text-sm text-white mt-1 hidden sm:block">
+                <p className="text-sm text-blue-900/70 mt-1 hidden sm:block">
                   {new Date().toLocaleDateString("es-ES", {
                     weekday: "long",
                     year: "numeric",
@@ -228,15 +118,15 @@ const AdminLayout = () => {
               <div className="hidden sm:flex items-center gap-3">
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col leading-tight text-right">
-                    <span className="text-white font-semibold text-sm truncate max-w-[180px]">
+                    <span className="text-blue-900 font-semibold text-sm truncate max-w-[180px]">
                       {user?.nombre || ""} {user?.apellido || ""}
                     </span>
-                    <span className="text-xs text-white/80 truncate max-w-[180px]">
+                    <span className="text-xs text-blue-900/70 truncate max-w-[180px]">
                       {user?.email || "correo@ejemplo.com"}
                     </span>
                   </div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white/70 bg-white/10 flex items-center justify-center">
-                    <CircleUser className="w-5 h-5 text-white" />
+                  <div className="w-10 h-10 rounded-full border-2 border-blue-900/30 bg-white/40 flex items-center justify-center">
+                    <CircleUser className="w-5 h-5 text-blue-900" />
                   </div>
                 </div>
               </div>
@@ -244,7 +134,7 @@ const AdminLayout = () => {
           </div>
         </div>
       </header>
-      {/* Mobile menu overlay */}
+
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/30 lg:hidden"
@@ -252,20 +142,18 @@ const AdminLayout = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col pt-20 ${
+        className={`fixed inset-y-0 left-0 z-40 bg-blue-50 shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col pt-20 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } ${isSidebarCollapsed ? "lg:w-20" : "lg:w-64"} w-64`}
       >
         <button
-          className="lg:hidden absolute right-4 top-4 p-2 text-blue-800 hover:text-blue-600"
+          className="lg:hidden absolute right-4 top-4 p-2 text-blue-700 hover:text-blue-600"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <X className="w-6 h-6" />
         </button>
 
-        {/* Navigation */}
         <nav className={`mt-6 flex-1 overflow-y-auto ${isSidebarCollapsed ? "lg:px-2" : "px-3"}`}>
           <div className="space-y-1 pb-4">
             {menuItems.map((item, index) => {
@@ -277,7 +165,6 @@ const AdminLayout = () => {
 
               return (
                 <div key={item.path}>
-                  {/* Separador de categoría */}
                   {showCategorySeparator && (
                     <div className={`my-4 ${isSidebarCollapsed ? "lg:px-1" : "px-4"}`}>
                       <div className="h-px bg-gray-400"></div>
@@ -301,18 +188,18 @@ const AdminLayout = () => {
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     title={isSidebarCollapsed ? item.label : ""}
-                    className={`w-full flex items-center ${isSidebarCollapsed ? "lg:justify-center lg:px-2" : "justify-between px-4"} py-3 mb-1 rounded-lg text-left transition-all duration-200 group hover:translate-x-1 cursor-pointer ${
+                    className={`w-full flex items-center ${isSidebarCollapsed ? "lg:justify-center lg:px-2" : "justify-between px-4"} py-3 mb-1 rounded-lg text-left transition-all duration-200 group hover:translate-x-2 cursor-pointer ${
                       isActive
-                        ? "bg-blue-800 text-white"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-600 active:text-gray-600"
+                        ? "bg-blue-300 text-blue-900"
+                        : "text-blue-900/70 hover:bg-blue-100 hover:text-blue-900 active:text-blue-900"
                     }`}
                   >
                     <div className="flex items-center">
                       <IconComponent
                         className={`w-5 h-5 ${
                           isActive
-                            ? "text-white"
-                            : "text-gray-400 group-hover:text-gray-600"
+                            ? "text-blue-900"
+                            : "text-blue-400 group-hover:text-blue-700"
                         }`}
                       />
                       <span
@@ -330,7 +217,7 @@ const AdminLayout = () => {
                         isSidebarCollapsed
                           ? "lg:w-0 lg:opacity-0 lg:overflow-hidden lg:translate-x-1"
                           : "lg:w-4 lg:opacity-100 lg:delay-150"
-                      } ${isActive ? "rotate-90 text-white" : "text-gray-400"}`}
+                      } ${isActive ? "rotate-90 text-blue-900" : "text-blue-400"}`}
                     />
                   </Link>
                 </div>
@@ -339,38 +226,23 @@ const AdminLayout = () => {
           </div>
         </nav>
 
-        {/* Logout */}
-        <div className={`mt-auto border-t border-gray-200 ${isSidebarCollapsed ? "lg:p-2" : "p-3"}`}>
+        <div className="mt-auto border-t border-blue-200 p-3">
           <button
-            className={`w-full flex items-center bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer rounded-lg transition-colors duration-200 ${
-              isSidebarCollapsed ? "lg:justify-center lg:px-2 lg:py-3" : "space-x-3 px-4 py-3"
-            }`}
+            className="w-full flex items-center bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer rounded-lg transition-colors duration-200 space-x-3 px-4 py-3"
             onClick={handleLogoutClick}
-            title={isSidebarCollapsed ? "Cerrar Sesión" : ""}
           >
             <LogOut className="w-5 h-5" />
-            <span
-              className={`font-medium whitespace-nowrap transition-opacity duration-200 ${
-                isSidebarCollapsed
-                  ? "lg:opacity-0 lg:pointer-events-none"
-                  : "lg:opacity-100 lg:delay-150"
-              }`}
-            >
-              Cerrar Sesión
-            </span>
+            <span className="font-medium">Cerrar Sesión</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden lg:ml-0 pt-20">
-        {/* Content Area */}
         <div className="p-4 lg:p-6 h-full overflow-y-auto">
           <Outlet context={{ isSidebarCollapsed, setIsSidebarCollapsed }} />
         </div>
       </main>
 
-      {/* Logout Modal */}
       <Transition appear show={isLogoutModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={handleCancelLogout}>
           <Transition.Child
@@ -437,7 +309,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
-
-
-
+export default SecretaryLayout;

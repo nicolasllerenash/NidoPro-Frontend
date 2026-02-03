@@ -362,7 +362,7 @@ const DataTable = ({
                   placeholder={searchPlaceholder}
                   value={globalFilter}
                   onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
                 />
               </div>
             )}
@@ -381,7 +381,7 @@ const DataTable = ({
                 <select
                   value={customFilters[key] || 'all'}
                   onChange={(e) => setCustomFilters(prev => ({ ...prev, [key]: e.target.value }))}
-                  className="w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                  className="w-full pl-10 pr-8 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-300 focus:border-blue-300 appearance-none bg-white"
                 >
                   <option value="all">{filterConfig.placeholder || `Todos ${filterConfig.label || key}`}</option>
                   {filterConfig.options?.map(option => (

@@ -51,9 +51,6 @@ import MovimientosCaja from "../admin/finanzas/movimientos/MovimientosCaja";
 import PagosPensiones from "../admin/finanzas/pensiones/PagosPensiones";
 import PagosMatriculas from "../admin/finanzas/matriculas/PagosMatriculas";
 import PagosPlanillas from "../admin/finanzas/planillas/PagosPlanillas";
-import Reportes from "../admin/reportes/Reportes";
-import Configuraciones from "../admin/configuraciones/Configuracion";
-import Usuarios from "../admin/usuarios/Usuarios";
 import Planificaciones from "../admin/planificaciones/Planificaciones";
 import Grados from "../admin/grados/aulas";
 import Pensiones from "../admin/pensiones/pensiones";
@@ -254,22 +251,10 @@ const AdminDashboard = () => {
       category: "administrativo",
     },
     {
-      id: "reports",
-      label: "Reportes",
-      icon: BarChart3,
-      category: "reportes",
-    },
-    {
       id: "ai-chat",
       label: "Asistente IA",
       icon: MessageCircle,
       category: "herramientas",
-    },
-    {
-      id: "users",
-      label: "Usuarios del Sistema",
-      icon: UsersIcon,
-      category: "usuarios",
     },
     {
       id: "roles",
@@ -299,12 +284,6 @@ const AdminDashboard = () => {
       id: "aulas",
       label: "Aulas y Espacios",
       icon: School,
-      category: "configuracion",
-    },
-    {
-      id: "settings",
-      label: "Configuración Avanzada",
-      icon: Settings,
       category: "configuracion",
     },
   ];
@@ -783,9 +762,6 @@ const AdminDashboard = () => {
           {activeSection === "cursos" && <Cursos />}
           {activeSection === "finances" && renderFinanceComponent()}
           {activeSection === "pensiones" && <Pensiones />}
-          {activeSection === "reports" && <Reportes />}
-          {activeSection === "users" && <Usuarios />}
-          {activeSection === "settings" && <Configuraciones />}
           {activeSection === "planificaciones" && <Planificaciones />}
           {activeSection === "grados" && <Grados />}
           {activeSection === "cronogramas" && <Cronogramas />}

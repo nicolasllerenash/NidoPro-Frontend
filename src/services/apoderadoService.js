@@ -48,7 +48,6 @@ export const apoderadoService = {
    */
   async getApoderados(params = {}) {
     try {
-      console.log('👨‍👩‍👧‍👦 Obteniendo apoderados...');
       
       // Construir query string
       const queryParams = new URLSearchParams();

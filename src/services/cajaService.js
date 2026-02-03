@@ -8,7 +8,7 @@ const cajaService = {
   /**
    * Obtener todos los movimientos de caja
    */
-  async obtenerMovimientos() {
+  async obtenerMovimientos(filtros = {}) {
     try {
       const token = localStorage.getItem('token');
       
@@ -19,7 +19,16 @@ const cajaService = {
       console.log('🔍 Obteniendo movimientos de caja...');
       console.log('🔐 Token:', token ? 'Token presente' : 'Token no encontrado');
 
-      const response = await fetch(`${API_BASE_URL}/caja-simple`, {
+      const params = new URLSearchParams();
+      if (filtros.mes) params.append('mes', filtros.mes);
+      if (filtros.anio) params.append('anio', filtros.anio);
+      if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+      if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+
+      const query = params.toString();
+      const url = query ? `${API_BASE_URL}/caja-simple?${query}` : `${API_BASE_URL}/caja-simple`;
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -35,9 +44,13 @@ const cajaService = {
       const data = await response.json();
       console.log('📥 Movimientos obtenidos:', data);
       
+      const movimientos = Array.isArray(data)
+        ? data
+        : data?.info?.data || data?.data || data?.movimientos || [];
+
       return {
         success: true,
-        movimientos: Array.isArray(data) ? data : []
+        movimientos: Array.isArray(movimientos) ? movimientos : []
       };
 
     } catch (error) {
