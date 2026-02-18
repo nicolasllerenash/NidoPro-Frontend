@@ -28,8 +28,6 @@ npm install
 cat > .env << EOF
 VITE_API_URL=https://eda.up.railway.app/api/v1
 VITE_NODE_ENV=production
-VITE_PORT=8080
-VITE_PUBLIC_URL=http://3.15.37.129:8080
 EOF
 ```
 
@@ -60,7 +58,7 @@ Asegúrate de que tu instancia EC2 permita:
 ## Verificación
 
 1. IP pública de la instancia: `3.15.37.129`
-2. Abre en navegador: `http://3.15.37.129:8080`
+2. Abre en navegador: `http://3.15.37.129`
 
 ## Mantener el servidor corriendo
 
